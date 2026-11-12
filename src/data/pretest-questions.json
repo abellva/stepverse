@@ -1,0 +1,67 @@
+[
+  {
+    "id": "pre-1",
+    "ctComponent": "decomposition",
+    "question": "Dalam pemrograman komputer (khususnya bahasa Python), apa definisi dan konsep dasar dari 'variabel'?",
+    "options": [
+      "Sebuah wadah atau tempat di dalam memori komputer yang diberi nama untuk menyimpan suatu nilai data",
+      "Perangkat keras komputer yang berfungsi untuk mencetak struk belanja",
+      "Sebuah rumus matematika tetap yang nilainya tidak dapat diubah-ubah",
+      "Perintah wajib untuk mematikan program setelah selesai dijalankan"
+    ],
+    "correctIndex": 0,
+    "explanation": "Variabel diibaratkan sebagai wadah atau kotak berlabel di dalam memori komputer. Label wadah adalah nama variabel, dan isi di dalamnya adalah nilai data yang disimpan."
+  },
+  {
+    "id": "pre-2",
+    "ctComponent": "abstraction",
+    "question": "Mengapa seorang pemrogram perlu menggunakan variabel dalam membuat program alih-alih mengetik nilainya secara langsung di setiap baris?",
+    "options": [
+      "Agar nilai data tersimpan rapi, mudah dipanggil kembali berkali-kali, dan nilainya dinamis (bisa diubah sewaktu-waktu)",
+      "Agar kode program menjadi lebih rumit dan tidak bisa dibaca oleh orang lain",
+      "Karena komputer akan rusak jika tidak menggunakan variabel",
+      "Agar nilai data terkunci permanen dan tidak bisa diganti sama sekali"
+    ],
+    "correctIndex": 0,
+    "explanation": "Fungsi utama variabel adalah mengabstraksi data ke dalam pengenal (identifier) sehingga program menjadi dinamis, mudah dimodifikasi, dan efisien saat dipanggil berulang kali."
+  },
+  {
+    "id": "pre-3",
+    "ctComponent": "algorithm_design",
+    "question": "Dalam bahasa Python, simbol sama dengan tunggal (=) pada baris kode harga_satuan = 15000 memiliki fungsi sebagai...",
+    "options": [
+      "Operator penugasan (assignment) untuk memasukkan nilai 15000 ke dalam wadah variabel harga_satuan",
+      "Simbol persamaan matematika untuk membuktikan bahwa harga_satuan bernilai sama dengan 15000",
+      "Perintah untuk mencetak angka 15000 ke layar monitor",
+      "Perintah untuk mengecek apakah variabel harga_satuan sudah pernah dibuat sebelumnya"
+    ],
+    "correctIndex": 0,
+    "explanation": "Tanda '=' dalam Python adalah operator penugasan (assignment operator), bukan persamaan matematika. Nilai di sebelah kanan (=) akan dimasukkan dan disimpan ke dalam variabel di sebelah kiri (=)."
+  },
+  {
+    "id": "pre-4",
+    "ctComponent": "debugging",
+    "question": "Manakah usulan nama variabel berikut yang SALAH dan akan memunculkan SyntaxError di Python karena melanggar aturan penamaan identifier?",
+    "options": [
+      "harga satuan (salah karena menggunakan spasi)",
+      "harga_satuan (menggunakan garis bawah / underscore)",
+      "hargaSatuan (menggunakan format camelCase)",
+      "_harga (diawali dengan garis bawah / underscore)"
+    ],
+    "correctIndex": 0,
+    "explanation": "Bahasa Python melarang penggunaan spasi dalam nama variabel. Untuk memisahkan dua kata atau lebih, aturan yang benar adalah menggunakan tanda garis bawah (underscore _) atau camelCase."
+  },
+  {
+    "id": "pre-5",
+    "ctComponent": "generalization",
+    "question": "Seorang siswa ingin menyimpan nama makanan ke variabel Python. Bagaimana aturan penulisan nilai yang benar untuk data berupa teks (String)?",
+    "options": [
+      "Wajib diapit tanda petik, contoh: nama_menu = \"Nasi Goreng\"",
+      "Wajib ditulis tanpa tanda petik, contoh: nama_menu = Nasi Goreng",
+      "Wajib diapit tanda kurung siku, contoh: nama_menu = [Nasi Goreng]",
+      "Wajib diawali dengan tanda pagar, contoh: nama_menu = #Nasi Goreng"
+    ],
+    "correctIndex": 0,
+    "explanation": "Dalam bahasa Python, nilai berupa teks (String) wajib diapit tanda petik tunggal ('...') atau ganda (\"...\") agar komputer dapat membedakan data teks harfiah dari nama variabel kode."
+  }
+]

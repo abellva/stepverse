@@ -1,0 +1,6 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="SVG Circular Progress Indicator">
+<path id="Vector" d="M16 100C16 146.361 53.6391 184 100 184C146.361 184 184 146.361 184 100C184 53.6391 146.361 16 100 16C53.6391 16 16 53.6391 16 100V100" stroke-width="12" stroke="#D9E3F9"/>
+<path id="Vector_2" d="M184 100C184 134.045 163.451 164.724 131.967 177.68C100.483 190.636 64.2927 183.308 40.3302 159.123C16.3676 134.939 9.37248 98.6826 22.6181 67.3196C35.8637 35.9566 66.7301 15.6903 100.774 16.004" stroke-width="12" stroke-linecap="round" stroke="#253F8A"/>
+</g>
+</svg>

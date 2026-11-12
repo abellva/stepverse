@@ -1,0 +1,67 @@
+[
+  {
+    "id": "post-1",
+    "ctComponent": "decomposition",
+    "question": "Perhatikan potongan kode program Python berikut:\nharga = 10000\nharga = 15000\nprint(harga)\n\nBerdasarkan konsep variabel sebagai wadah penyimpanan memori, apakah output yang dicetak ke layar dan mengapa?",
+    "options": [
+      "15000, karena nilai baru (15000) menimpa/menggantikan nilai lama (10000) di dalam variabel harga",
+      "10000, karena nilai yang pertama kali dimasukkan ke variabel terkunci dan tidak bisa diubah",
+      "25000, karena komputer otomatis menjumlahkan nilai lama dan nilai baru",
+      "Terjadi error, karena satu nama variabel tidak boleh diisi nilai lebih dari satu kali"
+    ],
+    "correctIndex": 0,
+    "explanation": "Variabel bersifat dinamis (dapat berubah/reassignment). Saat baris 'harga = 15000' dieksekusi, nilai 10000 di dalam memori digantikan oleh nilai baru 15000."
+  },
+  {
+    "id": "post-2",
+    "ctComponent": "abstraction",
+    "question": "Perhatikan 4 usulan nama variabel berikut:\n(1) 1_menu\n(2) menu_1\n(3) harga$\n(4) total_bayar\n\nBerdasarkan aturan penamaan variabel di Python, manakah kombinasi nama yang SAH (valid) digunakan?",
+    "options": [
+      "(2) dan (4) sah, sedangkan (1) salah karena diawali angka dan (3) salah karena memuat simbol khusus ($)",
+      "(1) dan (3) sah, sedangkan (2) dan (4) dilarang",
+      "Hanya (1) yang sah karena angka harus diletakkan di depan",
+      "Semua usulan nama (1, 2, 3, 4) sah dan boleh digunakan"
+    ],
+    "correctIndex": 0,
+    "explanation": "Aturan penamaan variabel Python: hanya boleh memuat huruf, angka, dan underscore (_), serta TIDAK boleh diawali angka. Maka 'menu_1' dan 'total_bayar' sah, sedangkan '1_menu' dan 'harga$' tidak valid."
+  },
+  {
+    "id": "post-3",
+    "ctComponent": "algorithm_design",
+    "question": "Seorang siswa menuliskan baris program berikut:\ntotal_belanja = 25000\nprint(Total_Belanja)\n\nSaat dijalankan, program menampilkan pesan 'NameError: name Total_Belanja is not defined'. Mengapa kesalahan ini terjadi?",
+    "options": [
+      "Bahasa Python bersifat case-sensitive (membedakan huruf besar dan kecil), sehingga 'total_belanja' dianggap berbeda dengan 'Total_Belanja'",
+      "Nilai 25000 terlalu besar untuk disimpan ke dalam variabel angka",
+      "Perintah print() hanya bisa mencetak teks di dalam tanda petik",
+      "Kata 'belanja' adalah kata terlarang dalam bahasa Python"
+    ],
+    "correctIndex": 0,
+    "explanation": "Python bersifat case-sensitive. Variabel 'total_belanja' (semua huruf kecil) tidak sama dengan 'Total_Belanja' (menggunakan huruf kapital T dan B). Python tidak menemukan variabel 'Total_Belanja' sehingga muncul NameError."
+  },
+  {
+    "id": "post-4",
+    "ctComponent": "debugging",
+    "question": "Perhatikan dua penugasan variabel berikut:\nbarang_a = 15000\nbarang_b = \"15000\"\n\nPernyataan manakah yang paling tepat menjelaskan perbedaan kedua variabel tersebut?",
+    "options": [
+      "barang_a bertipe data angka (Integer) sehingga siap dihitung, sedangkan barang_b bertipe teks (String) karena diapit tanda petik",
+      "barang_a dan barang_b memiliki tipe data yang sama persis dan tidak ada bedanya bagi komputer",
+      "barang_b adalah penulisan yang salah dan akan membuat komputer crash",
+      "barang_a hanya bisa dicetak sekali, sedangkan barang_b bisa dicetak berkali-kali"
+    ],
+    "correctIndex": 0,
+    "explanation": "Tanda petik menentukan tipe data. 'barang_a = 15000' adalah angka numerik (Integer), sedangkan 'barang_b = \"15000\"' adalah teks (String). Angka di dalam tanda petik diperlakukan sebagai karakter tulisan, bukan nilai kuantitas yang bisa dihitung."
+  },
+  {
+    "id": "post-5",
+    "ctComponent": "generalization",
+    "question": "Manakah baris penugasan nilai berikut yang akan menimbulkan SyntaxError karena menggunakan kata kunci bawaan (reserved keyword) Python sebagai nama variabel?",
+    "options": [
+      "for = 10 (salah karena 'for' adalah kata kunci perintah perulangan di Python)",
+      "jumlah_antrean = 10",
+      "nomor_meja = 10",
+      "stok_hari_ini = 10"
+    ],
+    "correctIndex": 0,
+    "explanation": "Python memiliki kata kunci khusus (reserved keywords) seperti 'for', 'if', 'while', 'class', 'def', dll. yang memiliki fungsi khusus dalam struktur bahasa, sehingga dilarang keras digunakan sebagai nama variabel."
+  }
+]

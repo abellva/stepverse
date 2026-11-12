@@ -1,0 +1,68 @@
+[
+  {
+    "id": "item-1",
+    "ctComponent": "decomposition",
+    "question": "[DUMMY - ganti dengan instrumen tervalidasi] Manakah langkah awal dekomposisi yang tepat untuk membuat program kasir kantin?",
+    "options": [
+      "Mengidentifikasi data input (nama barang, harga, kuantitas)",
+      "Membeli printer struk kasir baru",
+      "Langsung mengetik kode loop tanpa perencanaan",
+      "Menghubungkan aplikasi ke satelit perbankan"
+    ],
+    "correctIndex": 0,
+    "explanation": "Dekomposisi diawali dengan membedah data apa saja yang dibutuhkan (Input)."
+  },
+  {
+    "id": "item-2",
+    "ctComponent": "abstraction",
+    "question": "[DUMMY - ganti dengan instrumen tervalidasi] Dari informasi berikut, manakah informasi yang TIDAK RELEVAN (harus diabstraksi/dibuang) dalam menghitung total harga di kasir?",
+    "options": [
+      "Harga satuan barang",
+      "Jumlah barang yang dibeli",
+      "Warna baju pembeli saat memesan di kasir",
+      "Diskon promosi (jika ada)"
+    ],
+    "correctIndex": 2,
+    "explanation": "Abstraksi mengeliminasi detail yang tidak relevan seperti warna baju pembeli."
+  },
+  {
+    "id": "item-3",
+    "ctComponent": "algorithm_design",
+    "question": "[DUMMY - ganti dengan instrumen tervalidasi] Jika variabel harga = 10000 dan jumlah = 3, sintaks Python manakah yang tepat untuk menghitung total belanja?",
+    "options": [
+      "total = harga * jumlah",
+      "total = harga + jumlah",
+      "total = 'harga' * 'jumlah'",
+      "total == harga / jumlah"
+    ],
+    "correctIndex": 0,
+    "explanation": "Perhitungan total menggunakan operator perkalian (*) dengan variabel numerik."
+  },
+  {
+    "id": "item-4",
+    "ctComponent": "debugging",
+    "question": "[DUMMY - ganti dengan instrumen tervalidasi] Program mengeluarkan error: NameError: name 'harga_satuan' is not defined. Apa penyebab paling mungkin?",
+    "options": [
+      "Variabel harga_satuan belum dibuat atau ada salah ketik nama variabel",
+      "Komputer kehabisan memori RAM",
+      "Layar monitor belum dinyalakan",
+      "Program dijalankan terlalu cepat"
+    ],
+    "correctIndex": 0,
+    "explanation": "NameError muncul ketika Python menemui identifier yang belum didefinisikan sebelumnya."
+  },
+  {
+    "id": "item-5",
+    "ctComponent": "generalization",
+    "question": "[DUMMY - ganti dengan instrumen tervalidasi] Bagaimana agar formula kasir total = harga * jumlah dapat digeneralisasi untuk semua jenis barang di kantin?",
+    "options": [
+      "Menggunakan variabel dinamis yang menampung harga barang apa pun yang diinputkan",
+      "Menulis kode terpisah dengan angka mati untuk setiap bungkus makanan",
+      "Membatasi kantin hanya boleh menjual satu jenis makanan selamanya",
+      "Menghapus variabel jumlah dan selalu menganggap pembeli membeli 1 barang"
+    ],
+    "correctIndex": 0,
+    "explanation": "Generalisasi memanfaatkan variabel dinamis sehingga formula yang sama berlaku untuk input apa pun."
+  }
+]
+

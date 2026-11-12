@@ -1,0 +1,41 @@
+@import 'tailwindcss';
+@import '@fontsource/nunito-sans/400.css';
+@import '@fontsource/nunito-sans/600.css';
+@import '@fontsource/nunito-sans/700.css';
+@import '@fontsource/nunito-sans/800.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/700.css';
+
+@layer base {
+  :root {
+    color: #121c2c;
+    background: #f4fbff;
+    font-family: 'Nunito Sans', sans-serif;
+    font-synthesis: none;
+  }
+
+  html {
+    min-width: 320px;
+    min-height: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body,
+  #root {
+    min-width: 320px;
+    min-height: 100dvh;
+  }
+
+  *:focus-visible {
+    outline: 2px solid #68b6f7;
+    outline-offset: 2px;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Nunito Sans', sans-serif;
+  }
+
+  code, pre, .mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
