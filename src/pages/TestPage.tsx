@@ -109,10 +109,9 @@ export default function TestPage() {
                   }
 
                   if (submitted) {
-                    if (optIdx === item.correctIndex) {
-                      optStyle = 'bg-green-100 border-green-500 text-green-900 font-semibold';
-                    } else if (selected === optIdx && !isCorrect) {
-                      optStyle = 'bg-red-100 border-red-500 text-red-900';
+                    // Evaluasi murni (Pretest & Posttest): Kunci jawaban & warna benar/salah tidak dibocorkan
+                    if (selected === optIdx) {
+                      optStyle = 'bg-[#eaf6ff] border-[#68b6f7] text-[#253f8a] font-bold';
                     } else {
                       optStyle = 'bg-gray-50 border-gray-200 text-gray-400 opacity-60';
                     }
@@ -135,10 +134,13 @@ export default function TestPage() {
                 })}
               </div>
 
-              {/* Post-submit Explanation */}
+              {/* Status Pasca-Submit: Bersifat sumatif murni tanpa bocoran kunci/pembahasan instan */}
               {submitted && (
-                <div className="mt-2 p-2.5 rounded-xl bg-[#f8fafc] border border-gray-200 text-xs text-[#555] leading-relaxed">
-                  💡 <strong>Penjelasan Konsep:</strong> {item.explanation}
+                <div className="mt-2 p-2.5 rounded-xl bg-[#f4fbff] border border-[#d0ecff] text-xs text-[#253f8a] leading-relaxed flex items-center gap-2">
+                  <span>🔒</span>
+                  <span>
+                    <strong>Jawaban Terkunci:</strong> {isPretest ? 'Jawaban pretest awal telah terekam ke sistem.' : 'Posttest bersifat evaluasi akhir sumatif. Hasil terekam secara final untuk penilaian Guru.'}
+                  </span>
                 </div>
               )}
             </Card>

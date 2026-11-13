@@ -42,8 +42,8 @@ export interface Materi {
 export const MATERI_LIST: Materi[] = [
   {
     id: 1,
-    judul: 'Variabel & Penugasan Nilai',
-    deskripsi: 'Menyimpan data ke dalam variabel dan melakukan penugasan nilai.',
+    judul: 'Variabel & Tipe Data',
+    deskripsi: 'Memahami konsep wadah variabel, penugasan nilai, dan tipe data (String & Integer) dalam Python.',
     stages: ['video', 'ipo', 'dekomposisi', 'parsons', 'lab'],
     locked: false,
     videoSrc: '/video/materi fiks.mp4',
@@ -88,8 +88,8 @@ export const MATERI_LIST: Materi[] = [
   },
   {
     id: 2,
-    judul: 'Tipe Data',
-    deskripsi: 'Mengenal String, Integer, dan Float dalam Python.',
+    judul: 'Operator & Ekspresi Aritmatika',
+    deskripsi: 'Operasi matematika dan ekspresi logika dalam kalkulasi program.',
     stages: ['video', 'ipo', 'dekomposisi', 'parsons', 'lab'],
     locked: true,
   },

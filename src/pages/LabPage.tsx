@@ -49,12 +49,6 @@ export default function LabPage() {
   const [testSummary, setTestSummary] = useState<TestSuiteSummary | null>(null);
   const [iterations, setIterations] = useState(0);
 
-  // Hint Ladder & Dynamic Scoring (Initial: 100, decreases when hints are accessed)
-  const [hintLevel, setHintLevel] = useState(0);
-  const [maxHintOpened, setMaxHintOpened] = useState(0);
-  const hintPenalties = [0, 10, 25, 50]; // L0: 0, L1: -10, L2: -25, L3: -50
-  const currentScore = Math.max(50, 100 - (hintPenalties[maxHintOpened] || 0));
-
   const canProceed = progress[`${materiId}-lab`] === 'done' || testSummary?.overallPass;
 
   useEffect(() => {
@@ -148,8 +142,8 @@ export default function LabPage() {
 
     if (summary.overallPass) {
       setProgress(materiId, 'lab', 'done');
-      setAnswer(`${materiId}-lab-score`, currentScore);
-      setAnswer('lab_score', currentScore);
+      setAnswer(`${materiId}-lab-score`, 100);
+      setAnswer('lab_score', 100);
     }
   }
 
@@ -230,19 +224,16 @@ export default function LabPage() {
               </span>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-mono text-[#888]">
-                  Iterasi: <strong>{iterations}x</strong>
+                  Uji Coba: <strong>{iterations}x</strong>
                 </span>
                 <span
                   className={`text-xs font-mono font-bold px-2.5 py-0.5 rounded-full border ${
-                    currentScore >= 90
+                    canProceed
                       ? 'bg-green-100 text-green-800 border-green-300'
-                      : currentScore >= 75
-                      ? 'bg-amber-100 text-amber-800 border-amber-300'
-                      : 'bg-red-100 text-red-800 border-red-300'
+                      : 'bg-blue-50 text-blue-800 border-blue-200'
                   }`}
-                  title="Skor awal 100. Poin akan berkurang jika kamu membuka bantuan di bawah."
                 >
-                  ⭐ Skor Lab: {currentScore}/100
+                  {canProceed ? '⭐ Status: Lulus Uji Kasus (100)' : '⏳ Status: Proses Eksplorasi'}
                 </span>
               </div>
             </div>
@@ -295,90 +286,49 @@ export default function LabPage() {
             </div>
           </Card>
 
-          {/* Hint Ladder (3 Levels) */}
-          <Card className="border border-[#e2e8f0] p-4 bg-white">
-            <div className="flex items-center justify-between mb-2">
-              <span className="font-bold text-xs text-[#464555] uppercase tracking-wider flex items-center gap-1.5">
-                <span>🪜</span>
-                <span>Tangga Bantuan Bertingkat (Hint Ladder)</span>
+          {/* Peran Guru Sebagai Fasilitator Kelas (Menggantikan Hint Ladder) */}
+          <div
+            className="rounded-[28px] p-4 flex flex-col gap-2.5 transition-all"
+            style={{
+              background: iterations >= 3 || translatedError
+                ? 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)'
+                : 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+              border: iterations >= 3 || translatedError
+                ? '1.5px solid #fde68a'
+                : '1.5px solid #e2e8f0',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
+            }}
+          >
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-xs uppercase tracking-wider text-[#1e293b] flex items-center gap-1.5">
+                <span>🤝</span>
+                <span>Peran Guru Sebagai Fasilitator Kelas</span>
               </span>
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-mono text-[#253f8a]">
-                  Level Bantuan: {hintLevel}/3
+              {(iterations >= 3 || translatedError) && (
+                <span className="text-[10px] font-bold bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full animate-pulse">
+                  Perlu Bimbingan Guru
                 </span>
-                {maxHintOpened > 0 && (
-                  <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                    -{hintPenalties[maxHintOpened]} Poin
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {hintLevel === 0 && (
-              <p className="text-xs text-[#666]">
-                Skor awal 100. Membuka bantuan bertingkat akan mengurangi skor performa secara proporsional. Cobalah debug mandiri terlebih dahulu!
-              </p>
-            )}
-
-            {hintLevel >= 1 && (
-              <div className="p-2.5 rounded-xl bg-[#f4fbff] border border-[#d0ecff] text-xs text-[#253f8a] mb-2 leading-relaxed">
-                <strong>Bantuan 1 (Variabel):</strong> Simpan teks ke variabel dengan tanda petik, contoh: <code className="bg-white px-1 py-0.5 rounded">nama_barang = "Nasi Goreng"</code>. Untuk harga dan jumlah, tulis angka langsung tanpa petik.
-              </div>
-            )}
-
-            {hintLevel >= 2 && (
-              <div className="p-2.5 rounded-xl bg-[#fffbeb] border border-[#fef08a] text-xs text-[#92400e] mb-2 leading-relaxed">
-                <strong>Bantuan 2 (Aritmatika):</strong> Gunakan operator bintang (*) untuk perkalian: <code className="bg-white px-1 py-0.5 rounded">total = harga_satuan * jumlah</code>.
-              </div>
-            )}
-
-            {hintLevel >= 3 && (
-              <div className="p-2.5 rounded-xl bg-[#f0fdf4] border border-[#bbf7d0] text-xs text-[#166534] mb-2 leading-relaxed">
-                <strong>Bantuan 3 (Solusi Lengkap):</strong> Cetak variabel total menggunakan perintah: <code className="bg-white px-1 py-0.5 rounded">print("Total belanja:", total)</code>.
-              </div>
-            )}
-
-            <div className="flex justify-end gap-2 mt-1">
-              {hintLevel < 3 && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const next = hintLevel + 1;
-                    setHintLevel(next);
-                    setMaxHintOpened((prev) => Math.max(prev, next));
-                    logEvent({
-                      stage: 'lab',
-                      componentId: 'hint-view',
-                      ctComponent: 'debugging',
-                      result: 'info',
-                      payload: { hintLevel: next },
-                    });
-                  }}
-                  className="text-xs text-[#253f8a] px-4 py-2 rounded-full font-bold transition-all hover:brightness-105 flex items-center gap-1.5 active:scale-95"
-                  style={{
-                    background: '#eaf6ff',
-                    border: '1.5px solid #a6d7ff',
-                    boxShadow:
-                      'inset 2px 2px 4px rgba(61,107,145,0.18), inset -2px -2px 4px rgba(255,255,255,0.85), 0 2px 6px rgba(61,107,145,0.1)',
-                  }}
-                >
-                  <span>+ Buka Bantuan Level {hintLevel + 1}</span>
-                  <span className="text-[10px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded font-bold border border-amber-200">
-                    {hintLevel === 0 ? '-10 Poin' : hintLevel === 1 ? '-15 Poin' : '-25 Poin'}
-                  </span>
-                </button>
-              )}
-              {hintLevel > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setHintLevel(0)}
-                  className="text-xs text-[#888] hover:text-[#464555] px-2 py-1"
-                >
-                  Tutup Bantuan
-                </button>
               )}
             </div>
-          </Card>
+
+            <p className="text-xs text-[#475569] leading-relaxed">
+              Sistem tidak menyediakan tombol bocoran atau pengurangan poin otomatis. Jika kelompokmu mengalami kebuntuan logika atau uji kasus belum lolos:
+            </p>
+
+            <div className="p-3 rounded-2xl bg-white/80 border border-slate-200 text-xs text-[#334155] flex flex-col gap-1.5">
+              <div className="font-semibold text-[#1e293b] flex items-center gap-1.5">
+                <span>💡</span>
+                <span>Langkah Refleksi &amp; Diskusi:</span>
+              </div>
+              <ul className="list-disc pl-4 space-y-1 text-[11px] text-[#475569]">
+                <li>Diskusikan bersama rekan kelompok: apakah rumus perkalian <code>total = harga * jumlah</code> sudah sesuai urutan?</li>
+                <li>Periksa pesan galat ramah di panel kanan jika terjadi error sintaks/tipe data.</li>
+                <li>
+                  <strong>Panggil Guru di Kelas:</strong> Guru berperan mendampingi kelompok yang membutuhkan scaffold berpikir logika komputasi.
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
 
         {/* Right Column: Terminal & Friendly Error & Tests */}

@@ -211,7 +211,7 @@ export default function VideoPage() {
 
   function handleCompletePausePoint(
     pp: PausePoint,
-    meta?: { selectedOptionId?: string; isCorrect?: boolean; skipped?: boolean }
+    meta?: { selectedOptionId?: string; isCorrect?: boolean; skipped?: boolean; reason?: string }
   ) {
     const freshCompletions = getFreshCompletionsSnapshot();
     const nextCompletions: MateriPausePointMap = {
@@ -221,6 +221,7 @@ export default function VideoPage() {
         ...(meta?.skipped ? { skipped: true } : {}),
         ...(meta?.selectedOptionId ? { selectedOptionId: meta.selectedOptionId } : {}),
         ...(typeof meta?.isCorrect === 'boolean' ? { isCorrect: meta.isCorrect } : {}),
+        ...(meta?.reason ? { reason: meta.reason } : {}),
       },
     };
     setAnswer(getPausePointStorageKey(materiId), nextCompletions);

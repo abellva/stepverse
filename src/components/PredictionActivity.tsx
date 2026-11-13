@@ -7,11 +7,17 @@ interface PredictionActivityProps {
   pausePoint: PausePoint;
   savedRecord?: PausePointCompletionRecord;
   demoMode: boolean;
-  onComplete: (result: { selectedOptionId?: string; isCorrect?: boolean; skipped?: boolean }) => void;
+  onComplete: (result: {
+    selectedOptionId?: string;
+    isCorrect?: boolean;
+    skipped?: boolean;
+    reason?: string;
+  }) => void;
 }
 
 /**
- * Panel aktivitas pertanyaan prediksi dua pilihan dengan umpan balik konsep langsung.
+ * Panel aktivitas pertanyaan prediksi dua pilihan dengan umpan balik konsep langsung
+ * dan kewajiban menuliskan argumen/alasan logis.
  */
 export function PredictionActivity({
   pausePoint,
@@ -23,6 +29,7 @@ export function PredictionActivity({
   const [selectedId, setSelectedId] = useState<string | null>(
     savedRecord?.selectedOptionId ?? null
   );
+  const [reason, setReason] = useState<string>(savedRecord?.reason ?? '');
 
   if (!prediction) return null;
 
@@ -35,11 +42,12 @@ export function PredictionActivity({
   }
 
   function handleConfirmContinue() {
-    if (!selectedOption) return;
+    if (!selectedOption || reason.trim().length < 5) return;
     onComplete({
       selectedOptionId: selectedOption.id,
       isCorrect: selectedOption.isCorrect,
       skipped: false,
+      reason: reason.trim(),
     });
   }
 
@@ -117,19 +125,38 @@ export function PredictionActivity({
       </div>
 
       {selectedOption && (
-        <div
-          role="status"
-          aria-live="polite"
-          className={`p-4 rounded-2xl border text-xs sm:text-sm leading-relaxed ${
-            selectedOption.isCorrect
-              ? 'bg-emerald-50 border-emerald-200 text-emerald-950'
-              : 'bg-amber-50 border-amber-200 text-amber-950'
-          }`}
-        >
-          <p className="font-bold mb-1">
-            {selectedOption.isCorrect ? '✅ Prediksimu Tepat!' : '💡 Yuk Perhatikan Penjelasannya:'}
-          </p>
-          <p>{selectedOption.feedback}</p>
+        <div className="flex flex-col gap-3">
+          <div
+            role="status"
+            aria-live="polite"
+            className={`p-4 rounded-2xl border text-xs sm:text-sm leading-relaxed ${
+              selectedOption.isCorrect
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-950'
+                : 'bg-amber-50 border-amber-200 text-amber-950'
+            }`}
+          >
+            <p className="font-bold mb-1">
+              {selectedOption.isCorrect ? '✅ Prediksimu Tepat!' : '💡 Yuk Perhatikan Penjelasannya:'}
+            </p>
+            <p>{selectedOption.feedback}</p>
+          </div>
+
+          {/* Kolom Alasan/Argumen Logis Siswa */}
+          <div className="p-3.5 rounded-2xl bg-[#f8fbff] border border-[#bce0fd] flex flex-col gap-2">
+            <label className="text-xs font-bold text-[#1b2f68] flex items-center justify-between">
+              <span>✍️ Tuliskan Alasan / Argumen Kelompokmu (Wajib):</span>
+              <span className={`text-[10px] font-normal ${reason.trim().length >= 5 ? 'text-green-600 font-bold' : 'text-slate-400'}`}>
+                {reason.trim().length >= 5 ? '✓ Alasan terisi' : 'Minimal 5 karakter'}
+              </span>
+            </label>
+            <textarea
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="Jelaskan secara singkat: Mengapa nilai kotak tersebut belum atau sudah berubah menurut logika komputermu?"
+              rows={2}
+              className="w-full p-2.5 rounded-xl border border-[#c0d8ef] text-xs text-[#121c2c] bg-white focus:outline-none focus:border-[#253f8a] resize-none"
+            />
+          </div>
         </div>
       )}
 
@@ -158,10 +185,10 @@ export function PredictionActivity({
         <button
           type="button"
           onClick={handleConfirmContinue}
-          disabled={!selectedOption}
+          disabled={!selectedOption || reason.trim().length < 5}
           className="ml-auto px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold text-white transition hover:brightness-110 active:scale-98 disabled:opacity-40 disabled:cursor-not-allowed shadow-md"
           style={{
-            background: selectedOption
+            background: selectedOption && reason.trim().length >= 5
               ? 'linear-gradient(to bottom, #68b6f7, #3d6b91)'
               : '#c0cfe0',
           }}

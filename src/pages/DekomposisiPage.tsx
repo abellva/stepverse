@@ -57,8 +57,10 @@ export default function DekomposisiPage() {
   const { setProgress, setAnswer, incrementAttempt, answers, demoMode, progress } = useAppStore();
 
   const savedSlots = answers[`${materiId}-dekomposisi`] as (string | null)[] | undefined;
+  const savedReason = (answers[`${materiId}-dekomposisi-reason`] as string) ?? '';
 
   const [pool, setPool] = useState<DekomCard[]>(() => shuffle(CARDS));
+  const [reason, setReason] = useState<string>(savedReason);
   const [slots, setSlots] = useState<(DekomCard | null)[]>(
     savedSlots
       ? savedSlots.map((s) => (s ? CARDS.find((c) => c.id === s) ?? null : null))
@@ -235,7 +237,32 @@ export default function DekomposisiPage() {
       {canProceed && (
         <div role="alert" className="mb-4 p-4 rounded-2xl bg-green-50 border border-green-200 text-sm text-green-700 font-semibold shadow-sm flex items-center gap-2">
           <span className="text-xl">🎉</span>
-          <span>Hebat! Dekomposisi masalah kasir sudah tepat dan logis. Siap lanjut ke perancangan kode (Parsons Problem)!</span>
+          <span>Hebat! Dekomposisi masalah kasir sudah tepat dan logis. Tuliskan alasan di bawah sebelum lanjut ke Parsons Problem.</span>
+        </div>
+      )}
+
+      {/* Kolom Alasan / Argumen Siswa */}
+      {canProceed && (
+        <div className="mb-6 p-4 rounded-2xl bg-[#f8fbff] border border-[#bce0fd] flex flex-col gap-2 shadow-xs">
+          <label className="text-xs font-bold text-[#1b2f68] flex items-center justify-between">
+            <span>✍️ Tuliskan Alasan / Argumen Urutan Langkah (Wajib Sebelum Lanjut):</span>
+            <span className={`text-[10px] font-normal ${reason.trim().length >= 10 ? 'text-green-600 font-bold' : 'text-slate-400'}`}>
+              {reason.trim().length >= 10 ? '✓ Alasan terisi' : 'Minimal 10 karakter'}
+            </span>
+          </label>
+          <p className="text-[11px] text-[#464555]">
+            Jelaskan secara logis mengapa urutan program kasir harus dimulai dari menerima input data barang, menghitung total, menyusun format struk, hingga mencetak ke layar (dan mengapa langkah login/database belum relevan):
+          </p>
+          <textarea
+            value={reason}
+            onChange={(e) => {
+              setReason(e.target.value);
+              setAnswer(`${materiId}-dekomposisi-reason`, e.target.value);
+            }}
+            placeholder="Tuliskan argumen urutan logika kelompokmu di sini..."
+            rows={3}
+            className="w-full p-3 rounded-xl border border-[#c0d8ef] text-xs text-[#121c2c] bg-white focus:outline-none focus:border-[#253f8a] resize-none"
+          />
         </div>
       )}
 
@@ -269,12 +296,15 @@ export default function DekomposisiPage() {
           )}
           <button
             type="button"
-            onClick={() => navigate(`/materi/${materiId}/parsons`)}
-            disabled={!canProceed}
+            onClick={() => {
+              setAnswer(`${materiId}-dekomposisi-reason`, reason.trim());
+              navigate(`/materi/${materiId}/parsons`);
+            }}
+            disabled={!canProceed || reason.trim().length < 10}
             className="inline-flex items-center gap-2 font-bold rounded-full px-6 py-3 text-sm text-white transition-all hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-blue-400 outline-none active:scale-95"
             style={{
-              background: canProceed ? 'linear-gradient(to bottom, #68b6f7, #3d6b91)' : '#c0cfe0',
-              boxShadow: canProceed
+              background: canProceed && reason.trim().length >= 10 ? 'linear-gradient(to bottom, #68b6f7, #3d6b91)' : '#c0cfe0',
+              boxShadow: canProceed && reason.trim().length >= 10
                 ? '0 14px 20px -4px rgba(61,107,145,0.45), inset 0 2px 3px rgba(255,255,255,0.7), inset 0 -3px 0 #253f8a'
                 : 'none',
             }}

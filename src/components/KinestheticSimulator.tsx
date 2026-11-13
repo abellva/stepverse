@@ -41,6 +41,10 @@ export function KinestheticSimulator({
   const { setProgress, setAnswer, answers, demoMode, progress } = useAppStore();
 
   const savedState = answers[`${materiId}-simulasi`] as { role1Done: boolean; role2Done: boolean } | undefined;
+  const savedRoles = answers[`${materiId}-simulasi-roles`] as { studentA: string; studentB: string } | undefined;
+
+  const [studentA, setStudentA] = useState(savedRoles?.studentA || '');
+  const [studentB, setStudentB] = useState(savedRoles?.studentB || '');
 
   const [phase, setPhase] = useState<'intro' | 'role1' | 'swap' | 'role2' | 'done'>(
     savedState?.role2Done ? 'done' : savedState?.role1Done ? 'swap' : 'intro'
@@ -78,6 +82,11 @@ export function KinestheticSimulator({
   }, [running, stopTimer]);
 
   function startRole(role: Role) {
+    if (role === 'programmer') {
+      const nameA = studentA.trim() || 'Siswa 1';
+      const nameB = studentB.trim() || 'Siswa 2';
+      setAnswer(`${materiId}-simulasi-roles`, { studentA: nameA, studentB: nameB });
+    }
     setCurrentRole(role);
     setTimeLeft(TIMER_SECONDS);
     setChecked({});
@@ -88,7 +97,12 @@ export function KinestheticSimulator({
       componentId: `kinesthetic-${role}`,
       ctComponent: 'decomposition',
       result: 'in_progress',
-      payload: { role, round: role === 'programmer' ? 1 : 2 },
+      payload: {
+        role,
+        round: role === 'programmer' ? 1 : 2,
+        activeStudent: role === 'programmer' ? studentA : studentB,
+        partnerStudent: role === 'programmer' ? studentB : studentA,
+      },
     });
   }
 
@@ -181,15 +195,52 @@ export function KinestheticSimulator({
             </div>
           </div>
 
+          {/* Form Otentikasi Peran Anggota Kelompok */}
+          <div className="p-4 rounded-2xl bg-[#f4fbff] border border-[#bce0fd] flex flex-col gap-3">
+            <div className="flex items-center gap-2 text-xs font-bold text-[#1b2f68] uppercase tracking-wider">
+              <span>✍️ Otentikasi Pasangan Peran (Wajib Diisi):</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-[#121c2c] mb-1">
+                  Nama Siswa 1 (Programmer Ronde 1)
+                </label>
+                <input
+                  type="text"
+                  value={studentA}
+                  onChange={(e) => setStudentA(e.target.value)}
+                  placeholder="Contoh: Budi Santoso"
+                  className="w-full px-3.5 py-2 rounded-xl border border-[#c0d8ef] text-xs text-[#121c2c] bg-white focus:outline-none focus:border-[#253f8a]"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-[#121c2c] mb-1">
+                  Nama Siswa 2 (Komputer Ronde 1)
+                </label>
+                <input
+                  type="text"
+                  value={studentB}
+                  onChange={(e) => setStudentB(e.target.value)}
+                  placeholder="Contoh: Siti Rahayu"
+                  className="w-full px-3.5 py-2 rounded-xl border border-[#c0d8ef] text-xs text-[#121c2c] bg-white focus:outline-none focus:border-[#253f8a]"
+                />
+              </div>
+            </div>
+            <p className="text-[11px] text-[#64748b]">
+              *Identitas kedua siswa akan terekam sebagai bukti otentik pelaksanaan simulasi berpasangan di Dasbor Guru.
+            </p>
+          </div>
+
           <button
             type="button"
+            disabled={!studentA.trim() || !studentB.trim()}
             onClick={() => startRole('programmer')}
-            className="w-full py-3 rounded-full font-bold text-white text-sm transition hover:brightness-110 active:scale-98 focus-visible:ring-2 focus-visible:ring-blue-400 outline-none shadow-md"
+            className="w-full py-3 rounded-full font-bold text-white text-sm transition hover:brightness-110 active:scale-98 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-blue-400 outline-none shadow-md"
             style={{
               background: 'linear-gradient(to bottom, #68b6f7, #3d6b91)',
             }}
           >
-            🚀 Mulai Ronde 1 — Rekan A Jadi Programmer
+            🚀 Mulai Ronde 1 — {studentA.trim() ? `${studentA.trim()} sebagai Programmer` : 'Masukkan Nama Pasangan'}
           </button>
         </Card>
       )}
@@ -200,13 +251,17 @@ export function KinestheticSimulator({
           {/* Timer Card */}
           <Card className="text-center py-3 border border-[#bce0fd]">
             <div
-              className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-1"
+              className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-1"
               style={{
                 background: currentRole === 'programmer' ? '#eaf6ff' : '#f0fff4',
                 color: currentRole === 'programmer' ? '#253f8a' : '#15803d',
               }}
             >
-              {currentRole === 'programmer' ? '💻 Sedang Berperan: Programmer' : '🤖 Sedang Berperan: Komputer'}
+              {currentRole === 'programmer' ? (
+                <span>💻 Giliran: <strong>{studentA || 'Siswa 1'}</strong> (Programmer) ➔ Memberi Instruksi ke <strong>{studentB || 'Siswa 2'}</strong> (Komputer)</span>
+              ) : (
+                <span>🤖 Giliran: <strong>{studentB || 'Siswa 2'}</strong> (Programmer Baru) ➔ Memberi Instruksi ke <strong>{studentA || 'Siswa 1'}</strong> (Komputer Baru)</span>
+              )}
             </div>
 
             <div

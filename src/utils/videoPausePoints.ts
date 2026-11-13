@@ -5,6 +5,7 @@ export interface PausePointCompletionRecord {
   skipped?: boolean;
   selectedOptionId?: string;
   isCorrect?: boolean;
+  reason?: string;
 }
 
 export type MateriPausePointMap = Record<string, PausePointCompletionRecord>;

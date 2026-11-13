@@ -138,4 +138,34 @@ print("Total belanja:", total)
     expect(summary.overallPass).toBe(false);
     expect(summary.testResults.find((t) => t.id === 'test_hidden_generalization')?.passed).toBe(false);
   });
+
+  it('passes adaptively when user uses flexible variable names (menu, hrg, jml) and reversed multiplication order', () => {
+    const flexibleCode = `
+menu = "Bakso Mercon"
+hrg = 12000
+jml = 3
+total = jml * hrg
+print("Total bayar:", total)
+`;
+
+    const mockExecResult: ExecutionResult = {
+      status: 'success',
+      stdout: 'Total bayar: 36000\n',
+      stderr: '',
+      variables: {
+        menu: 'Bakso Mercon',
+        hrg: 12000,
+        jml: 3,
+        total: 36000,
+      },
+      executionTimeMs: 11,
+    };
+
+    const summary = runCodeTests(flexibleCode, mockExecResult);
+    expect(summary.overallPass).toBe(true);
+    expect(summary.visiblePassed).toBe(3);
+    expect(summary.hiddenPassed).toBe(2);
+    expect(summary.testResults[0].actualOutput).toContain('Bakso Mercon');
+    expect(summary.testResults[1].actualOutput).toContain('12000');
+  });
 });
