@@ -43,6 +43,22 @@ export function Topbar() {
                 {user.kelas}
               </span>
             )}
+
+            {user.peran === 'siswa' && (
+              <button
+                type="button"
+                onClick={() => navigate('/pilih-kelompok')}
+                title="Klik untuk melihat atau mengganti kelompok belajar"
+                className={`text-xs px-3 py-1 rounded-full font-bold transition flex items-center gap-1.5 active:scale-95 ${
+                  user.kelompok
+                    ? 'bg-blue-100 text-[#253f8a] border border-blue-300 hover:bg-blue-200'
+                    : 'bg-amber-100 text-amber-800 border border-amber-300 animate-pulse'
+                }`}
+              >
+                <span>👥</span>
+                <span>{user.kelompok ? `Kelompok ${user.kelompok}` : 'Pilih Kelompok'}</span>
+              </button>
+            )}
           </div>
 
           <button

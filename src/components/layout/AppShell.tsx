@@ -2,6 +2,7 @@ import { Outlet } from 'react-router';
 import { Topbar } from './Topbar';
 import { Sidebar } from './Sidebar';
 import { DemoToolbar } from '../DemoToolbar';
+import { GroupChatWidget } from '../chat/GroupChatWidget';
 import { useAppStore } from '../../store/useAppStore';
 
 export function AppShell() {
@@ -30,6 +31,8 @@ export function AppShell() {
             <Outlet />
           </main>
         </div>
+        {/* Floating Group Chat Widget */}
+        <GroupChatWidget />
       </div>
     </div>
   );

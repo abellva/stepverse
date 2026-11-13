@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router';
 import { useAppStore } from '../store/useAppStore';
 import { authenticate, KELAS_OPTIONS, SEKOLAH_OPTIONS } from '../data/users';
+import { getUserGroup } from '../services/groupService';
 
 type Peran = 'siswa' | 'guru';
 
@@ -68,8 +69,22 @@ export default function LoginPage() {
       localStorage.removeItem('stepverse-remembered');
     }
 
-    setUser({ id: user.id, nama: user.nama, peran: user.peran, kelas: user.kelas });
-    navigate(user.peran === 'guru' ? '/guru' : '/beranda');
+    const storedGroup = user.peran === 'siswa' ? getUserGroup(user.id) : undefined;
+    setUser({
+      id: user.id,
+      nama: user.nama,
+      peran: user.peran,
+      kelas: user.kelas,
+      kelompok: storedGroup?.id,
+    });
+
+    if (user.peran === 'guru') {
+      navigate('/guru');
+    } else if (storedGroup) {
+      navigate('/beranda');
+    } else {
+      navigate('/pilih-kelompok');
+    }
   }
 
   return (

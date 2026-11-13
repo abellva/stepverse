@@ -12,6 +12,7 @@ export interface UserSession {
   nama: string;
   peran: 'siswa' | 'guru';
   kelas: string;
+  kelompok?: number; // 1 to 5
 }
 
 export interface AppState {
@@ -21,6 +22,7 @@ export interface AppState {
   attempts: Record<string, number>;
   demoMode: boolean;
   setUser: (user: UserSession | null) => void;
+  setKelompok: (kelompok: number) => void;
   setProgress: (materiId: number, stage: string, status: StageProgress) => void;
   setAnswer: (key: string, value: unknown) => void;
   incrementAttempt: (key: string) => void;
@@ -55,6 +57,14 @@ export const useAppStore = create<AppState>()(
           }
         }
         set({ user });
+      },
+      setKelompok: (kelompok: number) => {
+        set((s) => {
+          if (!s.user) return s;
+          const updatedUser: UserSession = { ...s.user, kelompok };
+          syncActiveUserProgress(updatedUser, s.progress, s.answers, s.attempts);
+          return { user: updatedUser };
+        });
       },
       setProgress: (materiId, stage, status) => {
         set((s) => {

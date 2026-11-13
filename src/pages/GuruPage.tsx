@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { UserRecord, KELAS_OPTIONS } from '../data/users';
@@ -416,6 +417,35 @@ export default function GuruPage() {
           <span className="text-[10px] text-slate-500 block mt-1">Scaffolding Faded</span>
         </Card>
       </div>
+
+      {/* Banner Menuju Pemantauan Diskusi Kelompok & Log Chat */}
+      <Card className="p-4 border border-[#bce0fd] bg-gradient-to-r from-[#eaf6ff] via-white to-[#f4fbff] flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
+        <div className="flex items-center gap-3">
+          <div className="size-10 rounded-full bg-[#253f8a] text-white flex items-center justify-center text-lg shrink-0">
+            💬
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-sm text-[#121c2c]">
+                Pemantauan Diskusi Kolaborasi &amp; Chat Log 5 Kelompok
+              </span>
+              <span className="text-[10px] bg-blue-100 text-[#253f8a] font-bold px-2 py-0.5 rounded-full border border-blue-200">
+                Instrumen Sempro
+              </span>
+            </div>
+            <p className="text-xs text-[#555] mt-0.5">
+              Pantau perdebatan konsep siswa saat dekomposisi masalah kasir dan ekspor transkrip obrolan untuk lampiran penelitian.
+            </p>
+          </div>
+        </div>
+        <Link
+          to="/guru/kelompok"
+          className="px-4 py-2 rounded-full text-xs font-bold text-white transition hover:brightness-110 active:scale-95 whitespace-nowrap shadow-sm"
+          style={{ background: 'linear-gradient(to bottom, #68b6f7, #3d6b91)' }}
+        >
+          Buka Chat Log Kelompok →
+        </Link>
+      </Card>
 
       {/* Main Student Monitoring Table with Feature Scores */}
       <Card className="p-0 overflow-hidden border border-[#bce0fd]">

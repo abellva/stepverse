@@ -16,13 +16,50 @@ export default function BerandaPage() {
 
   return (
     <div>
-      <div className="mb-6">
+      <div className="mb-4">
         <h1 className="text-2xl font-bold text-[#121c2c] mb-1">
           Selamat datang, {user?.nama ?? 'Siswa'}! 👋
         </h1>
         <p className="text-sm text-[#464555]">
           Ikuti alur pembelajaran berpikir komputasional dengan kasus kasir Kantin Bu Ani.
         </p>
+      </div>
+
+      {/* Collaborative Group Status Banner */}
+      <div className="mb-6 p-4 rounded-3xl bg-white border border-[#bce0fd] flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
+        <div className="flex items-center gap-3">
+          <div className="size-10 rounded-full bg-[#eaf6ff] border border-[#a6d7ff] flex items-center justify-center text-lg shrink-0">
+            👥
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs uppercase font-extrabold tracking-wider text-[#253f8a]">
+                Kolaborasi Kelompok PBL
+              </span>
+              {user?.kelompok ? (
+                <span className="text-[10px] bg-green-100 text-green-800 font-bold px-2 py-0.5 rounded-full border border-green-200">
+                  Kelompok {user.kelompok} Terpilih
+                </span>
+              ) : (
+                <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full border border-amber-200">
+                  Belum Ada Kelompok
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-[#555] mt-0.5 leading-relaxed">
+              {user?.kelompok
+                ? `Kamu terdaftar di Kelompok ${user.kelompok}. Gunakan widget chat di pojok kanan bawah untuk berdiskusi real-time bersama tim.`
+                : 'Pilih kelompok belajar (kuota ganjil maks 5 siswa) untuk berbagi peran Programmer & Komputer.'}
+            </p>
+          </div>
+        </div>
+
+        <Link
+          to="/pilih-kelompok"
+          className="px-4 py-2 rounded-full text-xs font-bold text-[#253f8a] bg-[#eaf6ff] hover:bg-[#d0ecff] border border-[#a6d7ff] transition active:scale-95 whitespace-nowrap shadow-xs"
+        >
+          {user?.kelompok ? '⚙️ Kelola Kelompok →' : '👉 Pilih Kelompok (1-5) →'}
+        </Link>
       </div>
 
       {/* Pretest Banner Flow */}

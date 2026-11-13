@@ -5,7 +5,7 @@ import { ProgressBar } from '../ui/ProgressBar';
 
 // ─── Sidebar Siswa ───────────────────────────────────────────────
 function SidebarSiswa() {
-  const { progress, answers } = useAppStore();
+  const { progress, answers, user } = useAppStore();
   const isPretestDone = !!answers['pretest_result'] || !!answers['pretest_score'];
   const isPosttestDone = !!answers['posttest_result'] || !!answers['posttest_score'];
 
@@ -75,8 +75,15 @@ function SidebarSiswa() {
           badge={isPosttestDone ? '✅ Selesai' : progress['1-lab'] === 'done' ? 'Mulai' : undefined}
           badgeVariant={isPosttestDone ? 'done' : 'active'}
         />
-        <div className="pt-2">
+        <div className="pt-2 flex flex-col gap-1">
           <SidebarLink to="/beranda" icon="🏠" label="Beranda Materi" />
+          <SidebarLink
+            to="/pilih-kelompok"
+            icon="👥"
+            label="Kelompok Belajar"
+            badge={user?.kelompok ? `Kel. ${user.kelompok}` : 'Pilih'}
+            badgeVariant={user?.kelompok ? 'done' : 'active'}
+          />
         </div>
       </div>
     </>
@@ -93,6 +100,7 @@ function SidebarGuru() {
 
       <SidebarLink to="/guru"           icon="📊" label="Dashboard"            end />
       <SidebarLink to="/guru/kelas"     icon="👥" label="Daftar Siswa"         />
+      <SidebarLink to="/guru/kelompok"  icon="💬" label="Diskusi Kelompok"     />
       <SidebarLink to="/guru/kemajuan"  icon="📈" label="Kemajuan Belajar"     />
       <SidebarLink to="/guru/ct"        icon="🧠" label="Indikator CT"         />
       <SidebarLink to="/guru/ekspor"    icon="📥" label="Ekspor Data CSV"      />
