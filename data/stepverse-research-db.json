@@ -1,0 +1,1908 @@
+{
+  "chatMessages": [
+    {
+      "id": "chat-seed-1",
+      "timestamp": "2026-11-13T14:06:40.839Z",
+      "groupId": "Kelompok 1",
+      "senderId": "siswa-001",
+      "senderName": "Budi Santoso",
+      "senderRole": "siswa",
+      "stage": "ipo",
+      "message": "Teman-teman, harga_satuan dan jumlah itu masuk Input karena harus dimasukkan kasir dulu kan?"
+    },
+    {
+      "id": "chat-seed-2",
+      "timestamp": "2026-11-13T14:07:40.839Z",
+      "groupId": "Kelompok 1",
+      "senderId": "siswa-002",
+      "senderName": "Siti Rahayu",
+      "senderRole": "siswa",
+      "stage": "ipo",
+      "message": "Setuju! Lalu total = harga_satuan * jumlah masuk ke Proses karena dihitung komputer."
+    },
+    {
+      "id": "chat-seed-3",
+      "timestamp": "2026-11-13T14:10:40.839Z",
+      "groupId": "Kelompok 3",
+      "senderId": "siswa-003",
+      "senderName": "Ahmad Fauzi",
+      "senderRole": "siswa",
+      "stage": "lab",
+      "message": "Kami masih bingung kenapa total di Lab Python tidak berubah saat harga diubah, error terus di baris 12."
+    },
+    {
+      "id": "chat-1794579606128-zmnc8",
+      "timestamp": "2026-11-13T14:20:06.128Z",
+      "groupId": "Kelompok 1",
+      "senderId": "user-1794579571256",
+      "senderName": "imas",
+      "senderRole": "siswa",
+      "stage": "beranda",
+      "message": "ya setuju"
+    },
+    {
+      "id": "chat-1794582322844-sh4p7",
+      "timestamp": "2026-11-13T15:05:22.844Z",
+      "groupId": "Kelompok 1",
+      "senderId": "guru-001",
+      "senderName": "Bu Sari",
+      "senderRole": "guru",
+      "stage": "fasilitasi",
+      "message": "ada kendala apa?"
+    },
+    {
+      "id": "chat-1794590119581-q2d4h",
+      "timestamp": "2026-11-13T17:15:19.582Z",
+      "groupId": "Kelompok 1",
+      "senderId": "user-1794589397238",
+      "senderName": "Belva",
+      "senderRole": "siswa",
+      "stage": "ipo",
+      "message": "ini bu"
+    },
+    {
+      "id": "chat-1794590445259-51ayx",
+      "timestamp": "2026-11-13T17:20:45.259Z",
+      "groupId": "Kelompok 1",
+      "senderId": "user-1794589397238",
+      "senderName": "Belva",
+      "senderRole": "siswa",
+      "stage": "lab",
+      "message": "buuu"
+    },
+    {
+      "id": "chat-1794590533420-vv8rj",
+      "timestamp": "2026-11-13T17:22:13.420Z",
+      "groupId": "Kelompok 1",
+      "senderId": "guru-001",
+      "senderName": "Bu Sari",
+      "senderRole": "guru",
+      "stage": "fasilitasi",
+      "message": "gais gais"
+    },
+    {
+      "id": "chat-1794590557837-hn6nu",
+      "timestamp": "2026-11-13T17:22:37.837Z",
+      "groupId": "Kelompok 2",
+      "senderId": "guru-001",
+      "senderName": "Bu Sari",
+      "senderRole": "guru",
+      "stage": "fasilitasi",
+      "message": "gais"
+    },
+    {
+      "id": "chat-1794590560939-nuwf3",
+      "timestamp": "2026-11-13T17:22:40.939Z",
+      "groupId": "Kelompok 2",
+      "senderId": "guru-001",
+      "senderName": "Bu Sari",
+      "senderRole": "guru",
+      "stage": "fasilitasi",
+      "message": "gmn ini"
+    },
+    {
+      "id": "chat-1794590581520-10im4",
+      "timestamp": "2026-11-13T17:23:01.520Z",
+      "groupId": "Kelompok 3",
+      "senderId": "guru-001",
+      "senderName": "Bu Sari",
+      "senderRole": "guru",
+      "stage": "fasilitasi",
+      "message": "coba lihat"
+    },
+    {
+      "id": "chat-1794646264233-ysjc0",
+      "timestamp": "2026-11-14T08:51:04.233Z",
+      "groupId": "Kelompok 2",
+      "senderId": "user-1794646244649",
+      "senderName": "Belva R. Aydina",
+      "senderRole": "siswa",
+      "stage": "beranda",
+      "message": "wet"
+    },
+    {
+      "id": "chat-1794646844625-45wyv",
+      "timestamp": "2026-11-14T09:00:44.625Z",
+      "groupId": "Kelompok 2",
+      "senderId": "user-1794646244649",
+      "senderName": "Belva R. Aydina",
+      "senderRole": "siswa",
+      "stage": "video",
+      "message": "bu gini bener?"
+    },
+    {
+      "id": "chat-1794652600002-2348n",
+      "timestamp": "2026-11-14T10:36:40.002Z",
+      "groupId": "Kelompok 2",
+      "senderId": "guru-001",
+      "senderName": "Bu Sari",
+      "senderRole": "guru",
+      "stage": "fasilitasi",
+      "message": "iyaa bener"
+    }
+  ],
+  "monitoring": {
+    "siswa-001": {
+      "studentId": "siswa-001",
+      "studentName": "Budi Santoso",
+      "nisn": "0071234567",
+      "kelas": "X MIPA 1",
+      "groupId": "Kelompok 1",
+      "currentStage": "lab",
+      "stageEnteredAt": 1794579100839,
+      "stageDurationsMs": {
+        "video": 260000,
+        "ipo": 210000,
+        "dekomposisi": 190000,
+        "parsons": 240000,
+        "lab": 240000
+      },
+      "videoReplayCount": 1,
+      "failedAttemptsInStage": {
+        "lab": 1
+      },
+      "lastInteractionAt": 1794579295839,
+      "progress": {
+        "1-video": "done",
+        "1-simulasi": "done",
+        "1-ipo": "done",
+        "1-dekomposisi": "done",
+        "1-parsons": "done",
+        "1-lab": "done"
+      },
+      "scores": {
+        "pretest": 80,
+        "ipo": 100,
+        "dekomposisi": 100,
+        "parsons": 100,
+        "lab": 100,
+        "posttest": 100
+      },
+      "kinestheticPair": {
+        "programmerName": "Budi Santoso",
+        "komputerName": "Siti Rahayu"
+      },
+      "acknowledgedStuckAt": 1794653167859
+    },
+    "siswa-002": {
+      "studentId": "siswa-002",
+      "studentName": "Siti Rahayu",
+      "nisn": "0071234568",
+      "kelas": "X MIPA 1",
+      "groupId": "Kelompok 2",
+      "currentStage": "parsons",
+      "stageEnteredAt": 1794578920839,
+      "stageDurationsMs": {
+        "video": 310000,
+        "ipo": 250000,
+        "dekomposisi": 290000,
+        "parsons": 420000
+      },
+      "videoReplayCount": 3,
+      "failedAttemptsInStage": {
+        "parsons": 3
+      },
+      "lastInteractionAt": 1794579250839,
+      "progress": {
+        "1-video": "done",
+        "1-simulasi": "done",
+        "1-ipo": "done",
+        "1-dekomposisi": "done",
+        "1-parsons": "active"
+      },
+      "scores": {
+        "pretest": 60,
+        "ipo": 100,
+        "dekomposisi": 100
+      },
+      "kinestheticPair": {
+        "programmerName": "Siti Rahayu",
+        "komputerName": "Rina Putri"
+      },
+      "acknowledgedStuckAt": 1794653170026
+    },
+    "siswa-003": {
+      "studentId": "siswa-003",
+      "studentName": "Ahmad Fauzi",
+      "nisn": "0071234569",
+      "kelas": "X MIPA 1",
+      "groupId": "Kelompok 3",
+      "currentStage": "lab",
+      "stageEnteredAt": 1794578620839,
+      "stageDurationsMs": {
+        "video": 380000,
+        "ipo": 300000,
+        "dekomposisi": 340000,
+        "parsons": 410000,
+        "lab": 720000
+      },
+      "videoReplayCount": 4,
+      "failedAttemptsInStage": {
+        "lab": 5
+      },
+      "lastInteractionAt": 1794579220839,
+      "progress": {
+        "1-video": "done",
+        "1-simulasi": "done",
+        "1-ipo": "done",
+        "1-dekomposisi": "done",
+        "1-parsons": "done",
+        "1-lab": "active"
+      },
+      "scores": {
+        "pretest": 40,
+        "ipo": 100,
+        "dekomposisi": 100,
+        "parsons": 100
+      },
+      "kinestheticPair": {
+        "programmerName": "Ahmad Fauzi",
+        "komputerName": "Dimas Pratama"
+      },
+      "acknowledgedStuckAt": 1794653171534
+    },
+    "siswa-004": {
+      "studentId": "siswa-004",
+      "studentName": "Dewi Lestari",
+      "nisn": "0071234570",
+      "kelas": "X MIPA 1",
+      "groupId": "Kelompok 4",
+      "currentStage": "dekomposisi",
+      "stageEnteredAt": 1794579160839,
+      "stageDurationsMs": {
+        "video": 220000,
+        "ipo": 180000,
+        "dekomposisi": 180000
+      },
+      "videoReplayCount": 0,
+      "failedAttemptsInStage": {
+        "dekomposisi": 1
+      },
+      "lastInteractionAt": 1794579315839,
+      "progress": {
+        "1-video": "done",
+        "1-simulasi": "done",
+        "1-ipo": "done",
+        "1-dekomposisi": "active"
+      },
+      "scores": {
+        "pretest": 100,
+        "ipo": 100
+      },
+      "kinestheticPair": {
+        "programmerName": "Dewi Lestari",
+        "komputerName": "Bagas Adi"
+      },
+      "acknowledgedStuckAt": 1794653173125
+    },
+    "siswa-005": {
+      "studentId": "siswa-005",
+      "studentName": "Rizky Pratama",
+      "nisn": "0071234571",
+      "kelas": "X MIPA 1",
+      "groupId": "Kelompok 5",
+      "currentStage": "video",
+      "stageEnteredAt": 1794578680839,
+      "stageDurationsMs": {
+        "video": 660000
+      },
+      "videoReplayCount": 5,
+      "failedAttemptsInStage": {},
+      "lastInteractionAt": 1794579040839,
+      "progress": {
+        "1-video": "active"
+      },
+      "scores": {
+        "pretest": 60
+      },
+      "acknowledgedStuckAt": 1794653174126
+    },
+    "user-1794579571256": {
+      "studentId": "user-1794579571256",
+      "studentName": "imas",
+      "nisn": "user-1794579571256",
+      "kelas": "X MIPA 1",
+      "groupId": "Kelompok 1",
+      "currentStage": "beranda",
+      "stageEnteredAt": 1794579571260,
+      "stageDurationsMs": {
+        "beranda": 50502
+      },
+      "videoReplayCount": 0,
+      "failedAttemptsInStage": {},
+      "lastInteractionAt": 1794579606128,
+      "progress": {
+        "1-video": "active"
+      },
+      "scores": {},
+      "acknowledgedStuckAt": 1794653167975
+    },
+    "user-1794589397238": {
+      "studentId": "user-1794589397238",
+      "studentName": "Belva",
+      "nisn": "user-1794589397238",
+      "kelas": "X MIPA 1",
+      "groupId": "Kelompok 1",
+      "currentStage": "beranda",
+      "stageEnteredAt": 1794590486465,
+      "stageDurationsMs": {
+        "beranda": 21535,
+        "pretest": 168509,
+        "video": 527226,
+        "ipo": 74651,
+        "dekomposisi": 27223,
+        "parsons": 120866,
+        "lab": 128473,
+        "posttest": 31825
+      },
+      "videoReplayCount": 0,
+      "failedAttemptsInStage": {},
+      "lastInteractionAt": 1794590486468,
+      "progress": {
+        "1-video": "done",
+        "1-simulasi": "done",
+        "1-ipo": "done",
+        "1-dekomposisi": "done",
+        "1-parsons": "done",
+        "1-lab": "done",
+        "1-posttest": "done"
+      },
+      "scores": {
+        "pretest": 40,
+        "average": 90,
+        "ipo": 100,
+        "dekomposisi": 100,
+        "parsons": 100,
+        "lab": 100,
+        "posttest": 100
+      },
+      "kinestheticPair": {
+        "programmerName": "Belva",
+        "komputerName": "ai"
+      },
+      "acknowledgedStuckAt": 1794653168044
+    },
+    "user-1794646244649": {
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "nisn": "user-1794646244649",
+      "kelas": "X MIPA 2",
+      "groupId": "Kelompok 2",
+      "currentStage": "beranda",
+      "stageEnteredAt": 1794652454336,
+      "stageDurationsMs": {
+        "beranda": 123056,
+        "pretest": 267146,
+        "video": 364722,
+        "ipo": 314540,
+        "dekomposisi": 123022,
+        "parsons": 497656,
+        "diskusi": 3399,
+        "lab": 593252,
+        "posttest": 3922892
+      },
+      "videoReplayCount": 0,
+      "failedAttemptsInStage": {
+        "lab": 6
+      },
+      "lastInteractionAt": 1794652454345,
+      "progress": {
+        "1-video": "done",
+        "1-simulasi": "done",
+        "1-ipo": "done",
+        "1-dekomposisi": "done",
+        "1-parsons": "done",
+        "1-lab": "done",
+        "1-posttest": "done"
+      },
+      "scores": {
+        "pretest": 100,
+        "average": 100,
+        "ipo": 100,
+        "dekomposisi": 100,
+        "parsons": 100,
+        "lab": 100,
+        "posttest": 100
+      },
+      "kinestheticPair": {
+        "programmerName": "Belva R. Aydina",
+        "komputerName": "ayu"
+      },
+      "acknowledgedStuckAt": 1794653170127
+    }
+  },
+  "researchLogs": [
+    {
+      "id": "evt-1794579606288-4436t",
+      "timestamp": "2026-11-13T14:20:06.288Z",
+      "studentId": "user-1794579571256",
+      "studentName": "imas",
+      "groupId": "Kelompok 1",
+      "materi": 1,
+      "stage": "beranda",
+      "componentId": "group-chat-send",
+      "ctComponent": "decomposition",
+      "result": "info",
+      "attemptNo": 1,
+      "payload": {
+        "groupId": "Kelompok 1",
+        "messageLength": 9
+      }
+    },
+    {
+      "id": "evt-1794589565555-0127w",
+      "timestamp": "2026-11-13T17:06:05.555Z",
+      "studentId": "user-1794589397238",
+      "studentName": "Belva",
+      "groupId": "Kelompok 1",
+      "materi": 1,
+      "stage": "pretest",
+      "componentId": "pretest-submit",
+      "ctComponent": "generalization",
+      "result": "info",
+      "attemptNo": 1,
+      "payload": {
+        "score": 40,
+        "correctCount": 2,
+        "totalQuestions": 5,
+        "selectedAnswers": {
+          "0": 0,
+          "1": 0,
+          "2": 2,
+          "3": 1,
+          "4": 1
+        },
+        "reasons": {
+          "0": "karena",
+          "1": "yaaaa",
+          "2": "yoibro",
+          "3": "betul",
+          "4": "iyalah"
+        }
+      }
+    },
+    {
+      "id": "evt-1794589580365-ayjh2",
+      "timestamp": "2026-11-13T17:06:20.365Z",
+      "studentId": "user-1794589397238",
+      "studentName": "Belva",
+      "groupId": "Kelompok 1",
+      "materi": 1,
+      "stage": "video",
+      "componentId": "video-pause-m1-kinesthetic",
+      "ctComponent": "decomposition",
+      "result": "info",
+      "attemptNo": 1,
+      "payload": {
+        "time": 149,
+        "type": "kinesthetic",
+        "optional": false
+      }
+    },
+    {
+      "id": "evt-1794589580365-ixpo4",
+      "timestamp": "2026-11-13T17:06:20.365Z",
+      "studentId": "user-1794589397238",
+      "studentName": "Belva",
+      "groupId": "Kelompok 1",
+      "materi": 1,
+      "stage": "video",
+      "componentId": "video-pause-m1-kinesthetic",
+      "ctComponent": "decomposition",
+      "result": "info",
+      "attemptNo": 2,
+      "payload": {
+        "time": 149,
+        "type": "kinesthetic",
+        "optional": false
+      }
+    },
+    {
+      "id": "evt-1794589588793-ihqwm",
+      "timestamp": "2026-11-13T17:06:28.793Z",
+      "studentId": "user-1794589397238",
+      "studentName": "Belva",
+      "groupId": "Kelompok 1",
+      "materi": 1,
+      "stage": "simulasi",
+      "componentId": "kinesthetic-programmer",
+      "ctComponent": "decomposition",
+      "result": "in_progress",
+      "attemptNo": 1,
+      "payload": {
+        "role": "programmer",
+        "round": 1,
+        "programmerName": "Belva",
+        "komputerName": "ai",
+        "groupId": "Kelompok 1"
+      }
+    },
+    {
+      "id": "evt-1794589638688-q3267",
+      "timestamp": "2026-11-13T17:07:18.688Z",
+      "studentId": "user-1794589397238",
+      "studentName": "Belva",
+      "groupId": "Kelompok 1",
+      "materi": 1,
+      "stage": "simulasi",
+      "componentId": "kinesthetic-round1",
+      "ctComponent": "decomposition",
+      "result": "pass",
+      "attemptNo": 1,
+      "payload": {
+        "roleCompleted": "programmer",
+        "actorName": "Belva",
+        "partnerName": "ai",
+        "programmerInstruction": {
+          "variabelNama": "menu = \"nasi\"",
+          "variabelHarga": "hrg = 2000",
+          "variabelJumlah": "jml = 2",
+          "rumusTotal": "total = hrg * jml"
+        }
+      }
+    },
+    {
+      "id": "evt-1794589640041-pfalj",
+      "timestamp": "2026-11-13T17:07:20.041Z",
+      "studentId": "user-1794589397238",
+      "studentName": "Belva",
+      "groupId": "Kelompok 1",
+      "materi": 1,
+      "stage": "simulasi",
+      "componentId": "kinesthetic-komputer",
+      "ctComponent": "decomposition",
+      "result": "in_progress",
+      "attemptNo": 1,
+      "payload": {
+        "role": "komputer",
+        "round": 2,
+        "programmerName": "Belva",
+        "komputerName": "ai",
+        "groupId": "Kelompok 1"
+      }
+    },
+    {
+      "id": "evt-1794589694551-dtga1",
+      "timestamp": "2026-11-13T17:08:14.551Z",
+      "studentId": "user-1794589397238",
+      "studentName": "Belva",
+      "groupId": "Kelompok 1",
+      "materi": 1,
+      "stage": "video",
+      "componentId": "video-pause-m1-kinesthetic",
+      "ctComponent": "decomposition",
+      "result": "info",
+      "attemptNo": 3,
+      "payload": {
+        "time": 149,
+        "type": "kinesthetic",
+        "optional": false
+      }
+    },
+    {
+      "id": "evt-1794589694551-fyo5f",
+      "timestamp": "2026-11-13T17:08:14.551Z",
+      "studentId": "user-1794589397238",
+      "studentName": "Belva",
+      "groupId": "Kelompok 1",
+      "materi": 1,
+      "stage": "video",
+      "componentId": "video-pause-m1-kinesthetic",
+      "ctComponent": "decomposition",
+      "result": "info",
+      "attemptNo": 4,
+      "payload": {
+        "time": 149,
+        "type": "kinesthetic",
+        "optional": false
+      }
+    },
+    {
+      "id": "evt-1794589697805-kfnyg",
+      "timestamp": "2026-11-13T17:08:17.805Z",
+      "studentId": "user-1794589397238",
+      "studentName": "Belva",
+      "groupId": "Kelompok 1",
+      "materi": 1,
+      "stage": "simulasi",
+      "componentId": "kinesthetic-komputer",
+      "ctComponent": "decomposition",
+      "result": "in_progress",
+      "attemptNo": 2,
+      "payload": {
+        "role": "komputer",
+        "round": 2,
+        "programmerName": "Belva",
+        "komputerName": "ai",
+        "groupId": "Kelompok 1"
+      }
+    },
+    {
+      "id": "evt-1794589705434-8k8pd",
+      "timestamp": "2026-11-13T17:08:25.434Z",
+      "studentId": "user-1794589397238",
+      "studentName": "Belva",
+      "groupId": "Kelompok 1",
+      "materi": 1,
+      "stage": "simulasi",
+      "componentId": "kinesthetic-round2",
+      "ctComponent": "decomposition",
+      "result": "pass",
+      "attemptNo": 1,
+      "payload": {
+        "roleCompleted": "komputer",
+        "actorName": "ai",
+        "partnerName": "Belva",
+        "komputerMemory": {
+          "kotakNama": "",
+          "kotakHarga": "",
+          "kotakJumlah": "",
+          "kotakTotal": "",
+          "reportedAmbiguity": false
+        }
+      }
+    },
+    {
+      "id": "evt-1794589705439-ar3es",
+      "timestamp": "2026-11-13T17:08:25.439Z",
+      "studentId": "user-1794589397238",
+      "studentName": "Belva",
+      "groupId": "Kelompok 1",
+      "materi": 1,
+      "stage": "video",
+      "componentId": "video-pause-complete-m1-kinesthetic",
+      "ctComponent": "decomposition",
+      "result": "pass",
+      "attemptNo": 1,
+      "payload": {
+        "pausePointId": "m1-kinesthetic",
+        "type": "kinesthetic"
+      }
+    },
+    {
+      "id": "evt-1794589706496-28gxj",
+      "timestamp": "2026-11-13T17:08:26.496Z",
+      "studentId": "user-1794589397238",
+      "studentName": "Belva",
+      "groupId": "Kelompok 1",
+      "materi": 1,
+      "stage": "video",
+      "componentId": "video-pause-m1-prediction",
+      "ctComponent": "abstraction",
+      "result": "info",
+      "attemptNo": 1,
+      "payload": {
+        "time": 186.5,
+        "type": "prediction",
+        "optional": true
+      }
+    },
+    {
+      "id": "evt-1794589706497-o3v0h",
+      "timestamp": "2026-11-13T17:08:26.497Z",
+      "studentId": "user-1794589397238",
+      "studentName": "Belva",
+      "groupId": "Kelompok 1",
+      "materi": 1,
+      "stage": "video",
+      "componentId": "video-pause-m1-prediction",
+      "ctComponent": "abstraction",
+      "result": "info",
+      "attemptNo": 2,
+      "payload": {
+        "time": 186.5,
+        "type": "prediction",
+        "optional": true
+      }
+    },
+    {
+      "id": "evt-1794589875000-hggas",
+      "timestamp": "2026-11-13T17:11:15.000Z",
+      "studentId": "user-1794589397238",
+      "studentName": "Belva",
+      "groupId": "Kelompok 1",
+      "materi": 1,
+      "stage": "video",
+      "componentId": "video-pause-complete-m1-prediction",
+      "ctComponent": "abstraction",
+      "result": "pass",
+      "attemptNo": 1,
+      "payload": {
+        "pausePointId": "m1-prediction",
+        "type": "prediction",
+        "selectedOptionId": "16000",
+        "isCorrect": true,
+        "reason": "yaa gt",
+        "skipped": false
+      }
+    },
+    {
+      "id": "evt-1794590103222-a80eh",
+      "timestamp": "2026-11-13T17:15:03.222Z",
+      "studentId": "user-1794589397238",
+      "studentName": "Belva",
+      "groupId": "Kelompok 1",
+      "materi": 1,
+      "stage": "video",
+      "componentId": "video-proceed",
+      "ctComponent": "abstraction",
+      "result": "pass",
+      "attemptNo": 1,
+      "payload": {
+        "watchedPct": 1
+      }
+    },
+    {
+      "id": "evt-1794590119611-4o69l",
+      "timestamp": "2026-11-13T17:15:19.611Z",
+      "studentId": "user-1794589397238",
+      "studentName": "Belva",
+      "groupId": "Kelompok 1",
+      "materi": 1,
+      "stage": "ipo",
+      "componentId": "group-chat-send",
+      "ctComponent": "decomposition",
+      "result": "info",
+      "attemptNo": 1,
+      "payload": {
+        "groupId": "Kelompok 1",
+        "messageLength": 6
+      }
+    },
+    {
+      "id": "evt-1794590176054-7l53t",
+      "timestamp": "2026-11-13T17:16:16.054Z",
+      "studentId": "user-1794589397238",
+      "studentName": "Belva",
+      "groupId": "Kelompok 1",
+      "materi": 1,
+      "stage": "ipo",
+      "componentId": "ipo-check",
+      "ctComponent": "abstraction",
+      "result": "pass",
+      "attemptNo": 1,
+      "payload": {
+        "placed": {
+          "struk": "output",
+          "hitung_total": "process",
+          "nama_barang": "input",
+          "jumlah": "input",
+          "simpan_db": "process",
+          "harga_satuan": "input",
+          "cetak_struk": "process",
+          "nama_toko": "input",
+          "total_harga": "output"
+        },
+        "reasons": {
+          "input": "yh gt dh",
+          "process": "yh gt dh",
+          "output": "yh gt dh"
+        }
+      }
+    },
+    {
+      "id": "evt-1794590203473-54tqa",
+      "timestamp": "2026-11-13T17:16:43.473Z",
+      "studentId": "user-1794589397238",
+      "studentName": "Belva",
+      "groupId": "Kelompok 1",
+      "materi": 1,
+      "stage": "dekomposisi",
+      "componentId": "dekomposisi-check",
+      "ctComponent": "decomposition",
+      "result": "pass",
+      "attemptNo": 1,
+      "payload": {
+        "slots": [
+          "input-data",
+          "hitung",
+          "format-struk",
+          "cetak"
+        ],
+        "reason": "yhggggggggggg"
+      }
+    },
+    {
+      "id": "evt-1794590290901-wsz58",
+      "timestamp": "2026-11-13T17:18:10.901Z",
+      "studentId": "user-1794589397238",
+      "studentName": "Belva",
+      "groupId": "Kelompok 1",
+      "materi": 1,
+      "stage": "parsons",
+      "componentId": "parsons-l1",
+      "ctComponent": "algorithm_design",
+      "result": "pass",
+      "attemptNo": 1,
+      "payload": {
+        "placed": [
+          "p1_nama",
+          "p1_harga",
+          "p1_jumlah",
+          "p1_total",
+          "p1_print"
+        ]
+      }
+    },
+    {
+      "id": "evt-1794590322088-syena",
+      "timestamp": "2026-11-13T17:18:42.088Z",
+      "studentId": "user-1794589397238",
+      "studentName": "Belva",
+      "groupId": "Kelompok 1",
+      "materi": 1,
+      "stage": "parsons",
+      "componentId": "parsons-l2",
+      "ctComponent": "algorithm_design",
+      "result": "pass",
+      "attemptNo": 1,
+      "payload": {
+        "placed": [
+          {
+            "id": "p2_nama",
+            "filledBlanks": [
+              "\"\""
+            ]
+          },
+          {
+            "id": "p2_harga",
+            "filledBlanks": [
+              "4"
+            ]
+          },
+          {
+            "id": "p2_jumlah",
+            "filledBlanks": [
+              "1"
+            ]
+          },
+          {
+            "id": "p2_total",
+            "filledBlanks": [
+              "harga_satuan",
+              "jumlah"
+            ]
+          },
+          {
+            "id": "p2_print",
+            "filledBlanks": [
+              "total"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "evt-1794590382884-bjf47",
+      "timestamp": "2026-11-13T17:19:42.884Z",
+      "studentId": "user-1794589397238",
+      "studentName": "Belva",
+      "groupId": "Kelompok 1",
+      "materi": 1,
+      "stage": "lab",
+      "componentId": "lab-run",
+      "ctComponent": "debugging",
+      "result": "pass",
+      "attemptNo": 1,
+      "payload": {
+        "stdout": "=== STRUK KASIR KANTIN BU ANI ===\nBarang : yg\nHarga  : Rp 2\nJumlah : 3\nTotal  : Rp 6\n=================================\n"
+      }
+    },
+    {
+      "id": "evt-1794590385720-e8u1g",
+      "timestamp": "2026-11-13T17:19:45.720Z",
+      "studentId": "user-1794589397238",
+      "studentName": "Belva",
+      "groupId": "Kelompok 1",
+      "materi": 1,
+      "stage": "lab",
+      "componentId": "lab-submit-test",
+      "ctComponent": "generalization",
+      "result": "pass",
+      "attemptNo": 2,
+      "payload": {
+        "visiblePassed": 3,
+        "hiddenPassed": 2
+      }
+    },
+    {
+      "id": "evt-1794590445284-jee7x",
+      "timestamp": "2026-11-13T17:20:45.284Z",
+      "studentId": "user-1794589397238",
+      "studentName": "Belva",
+      "groupId": "Kelompok 1",
+      "materi": 1,
+      "stage": "lab",
+      "componentId": "group-chat-send",
+      "ctComponent": "decomposition",
+      "result": "info",
+      "attemptNo": 1,
+      "payload": {
+        "groupId": "Kelompok 1",
+        "messageLength": 4
+      }
+    },
+    {
+      "id": "evt-1794590484187-bo6cw",
+      "timestamp": "2026-11-13T17:21:24.187Z",
+      "studentId": "user-1794589397238",
+      "studentName": "Belva",
+      "groupId": "Kelompok 1",
+      "materi": 1,
+      "stage": "posttest",
+      "componentId": "posttest-submit",
+      "ctComponent": "generalization",
+      "result": "info",
+      "attemptNo": 1,
+      "payload": {
+        "score": 100,
+        "correctCount": 5,
+        "totalQuestions": 5,
+        "selectedAnswers": {
+          "0": 0,
+          "1": 0,
+          "2": 0,
+          "3": 0,
+          "4": 0
+        },
+        "reasons": {
+          "0": "terus di editor kode itu harusnya kodenya kosong, biar mereka yang nulis sendiri. terus si pemberitahuan test case nya juga gak dinamis, aku udah bikin kode yg bener tapi nama nama variabelnya aneh2, dan dia liat itu as an error. padahal harusnya nama variabel mah aman aja asal mengikuti ketentuan penulisan variabel yang bener.",
+          "1": "terus di editor kode itu harusnya kodenya kosong, biar mereka yang nulis sendiri. terus si pemberitahuan test case nya juga gak dinamis, aku udah bikin kode yg bener tapi nama nama variabelnya aneh2, dan dia liat itu as an error. padahal harusnya nama variabel mah aman aja asal mengikuti ketentuan penulisan variabel yang bener.",
+          "2": "terus di editor kode itu harusnya kodenya kosong, biar mereka yang nulis sendiri. terus si pemberitahuan test case nya juga gak dinamis, aku udah bikin kode yg bener tapi nama nama variabelnya aneh2, dan dia liat itu as an error. padahal harusnya nama variabel mah aman aja asal mengikuti ketentuan penulisan variabel yang bener.",
+          "3": "terus di editor kode itu harusnya kodenya kosong, biar mereka yang nulis sendiri. terus si pemberitahuan test case nya juga gak dinamis, aku udah bikin kode yg bener tapi nama nama variabelnya aneh2, dan dia liat itu as an error. padahal harusnya nama variabel mah aman aja asal mengikuti ketentuan penulisan variabel yang bener.",
+          "4": "terus di editor kode itu harusnya kodenya kosong, biar mereka yang nulis sendiri. terus si pemberitahuan test case nya juga gak dinamis, aku udah bikin kode yg bener tapi nama nama variabelnya aneh2, dan dia liat itu as an error. padahal harusnya nama variabel mah aman aja asal mengikuti ketentuan penulisan variabel yang bener."
+        }
+      }
+    },
+    {
+      "id": "evt-1794646264273-ketfu",
+      "timestamp": "2026-11-14T08:51:04.273Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "beranda",
+      "componentId": "group-chat-send",
+      "ctComponent": "decomposition",
+      "result": "info",
+      "attemptNo": 1,
+      "payload": {
+        "groupId": "Kelompok 2",
+        "messageLength": 3
+      }
+    },
+    {
+      "id": "evt-1794646603714-4b1zf",
+      "timestamp": "2026-11-14T08:56:43.714Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "pretest",
+      "componentId": "pretest-submit",
+      "ctComponent": "generalization",
+      "result": "info",
+      "attemptNo": 1,
+      "payload": {
+        "score": 100,
+        "correctCount": 5,
+        "totalQuestions": 5,
+        "selectedAnswers": {
+          "0": 0,
+          "1": 0,
+          "2": 0,
+          "3": 0,
+          "4": 0
+        },
+        "reasons": {
+          "0": "karena begitu",
+          "1": "karena",
+          "2": "karena",
+          "3": "yagitu",
+          "4": "ituyyyyg"
+        }
+      }
+    },
+    {
+      "id": "evt-1794646640735-64x02",
+      "timestamp": "2026-11-14T08:57:20.735Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "video",
+      "componentId": "video-pause-m1-kinesthetic",
+      "ctComponent": "decomposition",
+      "result": "info",
+      "attemptNo": 1,
+      "payload": {
+        "time": 149,
+        "type": "kinesthetic",
+        "optional": false
+      }
+    },
+    {
+      "id": "evt-1794646640736-pgth9",
+      "timestamp": "2026-11-14T08:57:20.736Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "video",
+      "componentId": "video-pause-m1-kinesthetic",
+      "ctComponent": "decomposition",
+      "result": "info",
+      "attemptNo": 2,
+      "payload": {
+        "time": 149,
+        "type": "kinesthetic",
+        "optional": false
+      }
+    },
+    {
+      "id": "evt-1794646647173-a48vc",
+      "timestamp": "2026-11-14T08:57:27.173Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "simulasi",
+      "componentId": "kinesthetic-start",
+      "ctComponent": "decomposition",
+      "result": "in_progress",
+      "attemptNo": 1,
+      "payload": {
+        "programmerName": "Belva R. Aydina",
+        "komputerName": "ayu",
+        "groupId": "Kelompok 2"
+      }
+    },
+    {
+      "id": "evt-1794646844643-9ixuu",
+      "timestamp": "2026-11-14T09:00:44.643Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "video",
+      "componentId": "group-chat-send",
+      "ctComponent": "decomposition",
+      "result": "info",
+      "attemptNo": 1,
+      "payload": {
+        "groupId": "Kelompok 2",
+        "messageLength": 14
+      }
+    },
+    {
+      "id": "evt-1794646879104-z5005",
+      "timestamp": "2026-11-14T09:01:19.104Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "simulasi",
+      "componentId": "kinesthetic-complete",
+      "ctComponent": "decomposition",
+      "result": "pass",
+      "attemptNo": 1,
+      "payload": {
+        "programmerName": "Belva R. Aydina",
+        "komputerName": "ayu",
+        "progInst": {
+          "variabelNama": "nama = \"bolu\"",
+          "variabelHarga": "harga = 13000",
+          "variabelJumlah": "jml = 3",
+          "rumusTotal": "ttl = hrg * jml"
+        },
+        "kompMem": {
+          "kotakNama": "bolu",
+          "kotakHarga": "13000",
+          "kotakJumlah": "3",
+          "kotakTotal": "13000",
+          "reportedAmbiguity": false
+        },
+        "hasProof": true
+      }
+    },
+    {
+      "id": "evt-1794646879157-0wxvn",
+      "timestamp": "2026-11-14T09:01:19.157Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "video",
+      "componentId": "video-pause-complete-m1-kinesthetic",
+      "ctComponent": "decomposition",
+      "result": "pass",
+      "attemptNo": 1,
+      "payload": {
+        "pausePointId": "m1-kinesthetic",
+        "type": "kinesthetic"
+      }
+    },
+    {
+      "id": "evt-1794646880210-onj9f",
+      "timestamp": "2026-11-14T09:01:20.210Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "video",
+      "componentId": "video-pause-m1-prediction",
+      "ctComponent": "abstraction",
+      "result": "info",
+      "attemptNo": 1,
+      "payload": {
+        "time": 186.5,
+        "type": "prediction",
+        "optional": false
+      }
+    },
+    {
+      "id": "evt-1794646880211-5v9pp",
+      "timestamp": "2026-11-14T09:01:20.211Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "video",
+      "componentId": "video-pause-m1-prediction",
+      "ctComponent": "abstraction",
+      "result": "info",
+      "attemptNo": 2,
+      "payload": {
+        "time": 186.5,
+        "type": "prediction",
+        "optional": false
+      }
+    },
+    {
+      "id": "evt-1794646911330-tx20h",
+      "timestamp": "2026-11-14T09:01:51.330Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "video",
+      "componentId": "video-pause-complete-m1-prediction",
+      "ctComponent": "abstraction",
+      "result": "pass",
+      "attemptNo": 1,
+      "payload": {
+        "pausePointId": "m1-prediction",
+        "type": "prediction",
+        "selectedOptionId": "16000",
+        "isCorrect": false,
+        "reason": "karena",
+        "skipped": false
+      }
+    },
+    {
+      "id": "evt-1794646994903-8ou1j",
+      "timestamp": "2026-11-14T09:03:14.903Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "video",
+      "componentId": "video-proceed",
+      "ctComponent": "abstraction",
+      "result": "pass",
+      "attemptNo": 1,
+      "payload": {
+        "watchedPct": 1
+      }
+    },
+    {
+      "id": "evt-1794647196542-gnvix",
+      "timestamp": "2026-11-14T09:06:36.542Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "ipo",
+      "componentId": "ipo-complete",
+      "ctComponent": "abstraction",
+      "result": "pass",
+      "attemptNo": 1,
+      "payload": {
+        "placed": {
+          "hitung_total": "process",
+          "jumlah": "input",
+          "nama_toko": "input",
+          "cetak_struk": "process",
+          "nama_barang": "input",
+          "total_harga": "output",
+          "harga_satuan": "input",
+          "simpan_db": "process",
+          "struk": "output"
+        },
+        "evals": {
+          "hitung_total": {
+            "placedCol": "process",
+            "reason": "karena hrs dihitung harga sama jumlahnya buat ngasih total",
+            "status": "bener",
+            "badgeLabel": "✅ Tepat & Logis (Bener)",
+            "feedback": "Luar biasa! Penempatan dan alasan logismu tepat: Formula total = harga_satuan * jumlah adalah instruksi pengolahan (Proses) matematika oleh CPU."
+          },
+          "jumlah": {
+            "placedCol": "input",
+            "reason": "harus diinput sama kita biar sesuai",
+            "status": "bener",
+            "badgeLabel": "✅ Tepat & Logis (Bener)",
+            "feedback": "Luar biasa! Penempatan dan alasan logismu tepat: Jumlah beli adalah data kuantitas awal (Input) bertipe Integer yang diinputkan pengguna."
+          },
+          "nama_toko": {
+            "placedCol": "input",
+            "reason": "harus diinput sama kita biar sesuai",
+            "status": "mendekati",
+            "badgeLabel": "⚠️ Informasi Pengecoh (Distractor)",
+            "feedback": "Kartu ini merupakan informasi pengecoh: Nama toko adalah detail statis yang tidak perlu diinput berulang kali dalam perhitungan kasir (abstraksi)."
+          },
+          "cetak_struk": {
+            "placedCol": "process",
+            "reason": "karena ini termasuk proses",
+            "status": "bener",
+            "badgeLabel": "✅ Tepat & Logis (Bener)",
+            "feedback": "Luar biasa! Penempatan dan alasan logismu tepat: Perintah pemanggilan print() adalah instruksi Proses yang memerintahkan komputer menyajikan data."
+          },
+          "nama_barang": {
+            "placedCol": "input",
+            "reason": "harus diinput sama kita biar sesuai",
+            "status": "bener",
+            "badgeLabel": "✅ Tepat & Logis (Bener)",
+            "feedback": "Luar biasa! Penempatan dan alasan logismu tepat: Nama barang adalah data masukan awal (Input) bertipe teks (String) yang diketikkan kasir."
+          },
+          "total_harga": {
+            "placedCol": "output",
+            "reason": "karena nanti kita harus tau brp yg hrs dibayar",
+            "status": "bener",
+            "badgeLabel": "✅ Tepat & Logis (Bener)",
+            "feedback": "Luar biasa! Penempatan dan alasan logismu tepat: Total nominal bayar adalah informasi hasil akhir (Output) dari kalkulasi yang disajikan ke pembeli."
+          },
+          "harga_satuan": {
+            "placedCol": "input",
+            "reason": "harus diinput sama kita biar sesuai",
+            "status": "bener",
+            "badgeLabel": "✅ Tepat & Logis (Bener)",
+            "feedback": "Luar biasa! Penempatan dan alasan logismu tepat: Harga satuan adalah data numerik awal (Input) bertipe Integer yang dimasukkan kasir."
+          },
+          "simpan_db": {
+            "placedCol": "process",
+            "reason": "biar tercatat di db",
+            "status": "mendekati",
+            "badgeLabel": "⚠️ Informasi Pengecoh (Distractor)",
+            "feedback": "Kartu ini merupakan informasi pengecoh: Penyimpanan database cloud belum dipelajari di Materi 1 dan bukan bagian inti kasir dasar."
+          },
+          "struk": {
+            "placedCol": "output",
+            "reason": "memang harus dikeluarkan",
+            "status": "bener",
+            "badgeLabel": "✅ Tepat & Logis (Bener)",
+            "feedback": "Luar biasa! Penempatan dan alasan logismu tepat: Struk belanja adalah bentuk keluaran fisik/layar (Output) yang diterima oleh pembeli kasir."
+          }
+        }
+      }
+    },
+    {
+      "id": "evt-1794647317960-4t0bk",
+      "timestamp": "2026-11-14T09:08:37.960Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "dekomposisi",
+      "componentId": "dekomposisi-check",
+      "ctComponent": "decomposition",
+      "result": "pass",
+      "attemptNo": 1,
+      "payload": {
+        "slots": [
+          "input-data",
+          "hitung",
+          "format-struk",
+          "cetak"
+        ],
+        "reason": "karena emg gt"
+      }
+    },
+    {
+      "id": "evt-1794647512121-v2zcl",
+      "timestamp": "2026-11-14T09:11:52.121Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "video",
+      "componentId": "video-proceed",
+      "ctComponent": "abstraction",
+      "result": "pass",
+      "attemptNo": 2,
+      "payload": {
+        "watchedPct": 1
+      }
+    },
+    {
+      "id": "evt-1794647557824-hunr1",
+      "timestamp": "2026-11-14T09:12:37.824Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "parsons",
+      "componentId": "parsons-l1",
+      "ctComponent": "algorithm_design",
+      "result": "pass",
+      "attemptNo": 1,
+      "payload": {
+        "placed": [
+          "p1_nama",
+          "p1_harga",
+          "p1_jumlah",
+          "p1_total",
+          "p1_print"
+        ],
+        "reasons": {
+          "p1_nama": "hrd di deklarasikan dlu biar bisa ddipanggil di bawah",
+          "p1_harga": "hrd di deklarasikan dlu biar bisa ddipanggil di bawah",
+          "p1_jumlah": "hrd di deklarasikan dlu biar bisa ddipanggil di bawah",
+          "p1_total": "emg gt",
+          "p1_print": "emg gt"
+        }
+      }
+    },
+    {
+      "id": "evt-1794647663423-v3t28",
+      "timestamp": "2026-11-14T09:14:23.423Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "parsons",
+      "componentId": "parsons-l2",
+      "ctComponent": "algorithm_design",
+      "result": "pass",
+      "attemptNo": 1,
+      "payload": {
+        "placed": [
+          {
+            "id": "p2_nama",
+            "filledBlanks": [
+              "\"y\""
+            ]
+          },
+          {
+            "id": "p2_harga",
+            "filledBlanks": [
+              "21"
+            ]
+          },
+          {
+            "id": "p2_jumlah",
+            "filledBlanks": [
+              "1"
+            ]
+          },
+          {
+            "id": "p2_total",
+            "filledBlanks": [
+              "harga_satuan",
+              "jumlah"
+            ]
+          },
+          {
+            "id": "p2_print",
+            "filledBlanks": [
+              "total"
+            ]
+          }
+        ],
+        "reasons": {
+          "p2_nama": "hrd di deklarasikan dlu biar bisa ddipanggil di bawah",
+          "p2_harga": "hrd di deklarasikan dlu biar bisa ddipanggil di bawah",
+          "p2_jumlah": "hrd di deklarasikan dlu biar bisa ddipanggil di bawah",
+          "p2_total": "emg gt",
+          "p2_print": "emg gt"
+        }
+      }
+    },
+    {
+      "id": "evt-1794647853727-8dbep",
+      "timestamp": "2026-11-14T09:17:33.727Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "lab",
+      "componentId": "lab-run",
+      "ctComponent": "debugging",
+      "result": "pass",
+      "attemptNo": 1,
+      "payload": {
+        "stdout": "barang =  nasgor\nharga =  21\njumlah =  2\ntotal =  42\n"
+      }
+    },
+    {
+      "id": "evt-1794647863553-90xrv",
+      "timestamp": "2026-11-14T09:17:43.553Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "lab",
+      "componentId": "lab-submit-test",
+      "ctComponent": "generalization",
+      "result": "fail",
+      "attemptNo": 2,
+      "payload": {
+        "visiblePassed": 2,
+        "hiddenPassed": 0
+      }
+    },
+    {
+      "id": "evt-1794647901923-pcbht",
+      "timestamp": "2026-11-14T09:18:21.923Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "lab",
+      "componentId": "lab-run",
+      "ctComponent": "debugging",
+      "result": "pass",
+      "attemptNo": 3,
+      "payload": {
+        "stdout": "barang =  nasgor\nharga =  21\njumlah =  2\ntotal =  42\n"
+      }
+    },
+    {
+      "id": "evt-1794647904871-yeo9i",
+      "timestamp": "2026-11-14T09:18:24.871Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "lab",
+      "componentId": "lab-submit-test",
+      "ctComponent": "generalization",
+      "result": "fail",
+      "attemptNo": 4,
+      "payload": {
+        "visiblePassed": 2,
+        "hiddenPassed": 0
+      }
+    },
+    {
+      "id": "evt-1794648073974-h4b3r",
+      "timestamp": "2026-11-14T09:21:13.974Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "lab",
+      "componentId": "lab-run",
+      "ctComponent": "debugging",
+      "result": "pass",
+      "attemptNo": 5,
+      "payload": {
+        "stdout": "barang =  nasgor\nharga =  21\njumlah =  2\ntotal =  42\n"
+      }
+    },
+    {
+      "id": "evt-1794648075003-ztkvf",
+      "timestamp": "2026-11-14T09:21:15.003Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "lab",
+      "componentId": "lab-submit-test",
+      "ctComponent": "generalization",
+      "result": "fail",
+      "attemptNo": 6,
+      "payload": {
+        "visiblePassed": 2,
+        "hiddenPassed": 1
+      }
+    },
+    {
+      "id": "evt-1794648104255-ybxa8",
+      "timestamp": "2026-11-14T09:21:44.255Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "lab",
+      "componentId": "lab-submit-test",
+      "ctComponent": "generalization",
+      "result": "pass",
+      "attemptNo": 7,
+      "payload": {
+        "visiblePassed": 3,
+        "hiddenPassed": 2
+      }
+    },
+    {
+      "id": "evt-1794648214513-epc6j",
+      "timestamp": "2026-11-14T09:23:34.513Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "lab",
+      "componentId": "lab-submit-test",
+      "ctComponent": "generalization",
+      "result": "pass",
+      "attemptNo": 1,
+      "payload": {
+        "visiblePassed": 3,
+        "hiddenPassed": 2
+      }
+    },
+    {
+      "id": "evt-1794648246155-8vue4",
+      "timestamp": "2026-11-14T09:24:06.155Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "lab",
+      "componentId": "lab-submit-test",
+      "ctComponent": "generalization",
+      "result": "pass",
+      "attemptNo": 1,
+      "payload": {
+        "visiblePassed": 3,
+        "hiddenPassed": 2
+      }
+    },
+    {
+      "id": "evt-1794652144259-ytxnc",
+      "timestamp": "2026-11-14T10:29:04.259Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "dekomposisi",
+      "componentId": "dekomposisi-check",
+      "ctComponent": "decomposition",
+      "result": "pass",
+      "attemptNo": 1,
+      "payload": {
+        "slots": [
+          "input-data",
+          "hitung",
+          "format-struk",
+          "cetak"
+        ],
+        "reason": "karena emg gt",
+        "evaluation": {
+          "status": "mendekati",
+          "badgeLabel": "⚠️ Alasan Mendekati",
+          "badgeClass": "bg-amber-50 text-amber-950 border-amber-300",
+          "feedback": "Urutan langkah sudah tepat! Alasanmu sudah cukup baik, namun ingat prinsip dekomposisi: data kasir harus ada terlebih dahulu sebelum dikalikan."
+        }
+      }
+    },
+    {
+      "id": "evt-1794652224434-cg3dk",
+      "timestamp": "2026-11-14T10:30:24.434Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "parsons",
+      "componentId": "parsons-l1",
+      "ctComponent": "algorithm_design",
+      "result": "pass",
+      "attemptNo": 1,
+      "payload": {
+        "placed": [
+          "p1_nama",
+          "p1_harga",
+          "p1_jumlah",
+          "p1_total",
+          "p1_print"
+        ],
+        "reasons": {
+          "p1_nama": "hrd di deklarasikan dlu biar bisa ddipanggil di bawah",
+          "p1_harga": "hrd di deklarasikan dlu biar bisa ddipanggil di bawah",
+          "p1_jumlah": "hrd di deklarasikan dlu biar bisa ddipanggil di bawah",
+          "p1_total": "emg gt",
+          "p1_print": "emg gt"
+        },
+        "evaluations": {
+          "p1_nama": {
+            "status": "mendekati",
+            "badgeLabel": "⚠️ Alasan Mendekati",
+            "badgeClass": "bg-amber-950 text-amber-200 border-amber-500",
+            "feedback": "Penempatan baris sesuai. Ingat bahwa baris ini berfungsi menginisialisasi variabel masukan agar tersimpan di memori."
+          },
+          "p1_harga": {
+            "status": "mendekati",
+            "badgeLabel": "⚠️ Alasan Mendekati",
+            "badgeClass": "bg-amber-950 text-amber-200 border-amber-500",
+            "feedback": "Penempatan baris sesuai. Ingat bahwa baris ini berfungsi menginisialisasi variabel masukan agar tersimpan di memori."
+          },
+          "p1_jumlah": {
+            "status": "mendekati",
+            "badgeLabel": "⚠️ Alasan Mendekati",
+            "badgeClass": "bg-amber-950 text-amber-200 border-amber-500",
+            "feedback": "Penempatan baris sesuai. Ingat bahwa baris ini berfungsi menginisialisasi variabel masukan agar tersimpan di memori."
+          },
+          "p1_total": {
+            "status": "mendekati",
+            "badgeLabel": "⚠️ Alasan Mendekati",
+            "badgeClass": "bg-amber-950 text-amber-200 border-amber-500",
+            "feedback": "Penempatan baris perkalian total sudah tepat. Ingat bahwa rumus ini memerlukan nilai harga dan jumlah yang sudah ada sebelumnya."
+          },
+          "p1_print": {
+            "status": "mendekati",
+            "badgeLabel": "⚠️ Alasan Mendekati",
+            "badgeClass": "bg-amber-950 text-amber-200 border-amber-500",
+            "feedback": "Penempatan baris cetak print() sudah tepat. Perintah cetak dijalankan di akhir untuk menampilkan struk kepada pembeli."
+          }
+        }
+      }
+    },
+    {
+      "id": "evt-1794652364545-susec",
+      "timestamp": "2026-11-14T10:32:44.545Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "parsons",
+      "componentId": "parsons-l2",
+      "ctComponent": "algorithm_design",
+      "result": "pass",
+      "attemptNo": 1,
+      "payload": {
+        "placed": [
+          {
+            "id": "p2_nama",
+            "filledBlanks": [
+              "\"y\""
+            ]
+          },
+          {
+            "id": "p2_harga",
+            "filledBlanks": [
+              "22"
+            ]
+          },
+          {
+            "id": "p2_jumlah",
+            "filledBlanks": [
+              "2"
+            ]
+          },
+          {
+            "id": "p2_total",
+            "filledBlanks": [
+              "harga_satuan",
+              "jumlah"
+            ]
+          },
+          {
+            "id": "p2_print",
+            "filledBlanks": [
+              "total"
+            ]
+          }
+        ],
+        "reasons": {
+          "p2_nama": "hrd di deklarasikan dlu biar bisa ddipanggil di bawah",
+          "p2_harga": "hrd di deklarasikan dlu biar bisa ddipanggil di bawah",
+          "p2_jumlah": "hrd di deklarasikan dlu biar bisa ddipanggil di bawah",
+          "p2_total": "emg gt",
+          "p2_print": "emg gt"
+        },
+        "evaluations": {
+          "p2_nama": {
+            "status": "mendekati",
+            "badgeLabel": "⚠️ Alasan Mendekati",
+            "badgeClass": "bg-amber-950 text-amber-200 border-amber-500",
+            "feedback": "Penempatan baris sesuai. Ingat bahwa baris ini berfungsi menginisialisasi variabel masukan agar tersimpan di memori."
+          },
+          "p2_harga": {
+            "status": "mendekati",
+            "badgeLabel": "⚠️ Alasan Mendekati",
+            "badgeClass": "bg-amber-950 text-amber-200 border-amber-500",
+            "feedback": "Penempatan baris sesuai. Ingat bahwa baris ini berfungsi menginisialisasi variabel masukan agar tersimpan di memori."
+          },
+          "p2_jumlah": {
+            "status": "mendekati",
+            "badgeLabel": "⚠️ Alasan Mendekati",
+            "badgeClass": "bg-amber-950 text-amber-200 border-amber-500",
+            "feedback": "Penempatan baris sesuai. Ingat bahwa baris ini berfungsi menginisialisasi variabel masukan agar tersimpan di memori."
+          },
+          "p2_total": {
+            "status": "mendekati",
+            "badgeLabel": "⚠️ Alasan Mendekati",
+            "badgeClass": "bg-amber-950 text-amber-200 border-amber-500",
+            "feedback": "Penempatan baris perkalian total sudah tepat. Ingat bahwa rumus ini memerlukan nilai harga dan jumlah yang sudah ada sebelumnya."
+          },
+          "p2_print": {
+            "status": "mendekati",
+            "badgeLabel": "⚠️ Alasan Mendekati",
+            "badgeClass": "bg-amber-950 text-amber-200 border-amber-500",
+            "feedback": "Penempatan baris cetak print() sudah tepat. Perintah cetak dijalankan di akhir untuk menampilkan struk kepada pembeli."
+          }
+        }
+      }
+    },
+    {
+      "id": "evt-1794652371780-bxl5z",
+      "timestamp": "2026-11-14T10:32:51.780Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "lab",
+      "componentId": "lab-run",
+      "ctComponent": "debugging",
+      "result": "fail",
+      "attemptNo": 1,
+      "payload": {
+        "errorType": "SyntaxError",
+        "raw": "SyntaxError (Baris 7): Format perintah print tidak lengkap (tutup kurung ')' hilang)."
+      }
+    },
+    {
+      "id": "evt-1794652389569-dyl03",
+      "timestamp": "2026-11-14T10:33:09.569Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "lab",
+      "componentId": "lab-run",
+      "ctComponent": "debugging",
+      "result": "pass",
+      "attemptNo": 2,
+      "payload": {
+        "stdout": "barang =  nasgor\nharga =  21\njumlah =  2\ntotal =  42\n"
+      }
+    },
+    {
+      "id": "evt-1794652392931-sxnwe",
+      "timestamp": "2026-11-14T10:33:12.931Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "lab",
+      "componentId": "lab-submit-test",
+      "ctComponent": "generalization",
+      "result": "fail",
+      "attemptNo": 3,
+      "payload": {
+        "visiblePassed": 2,
+        "hiddenPassed": 1
+      }
+    },
+    {
+      "id": "evt-1794652397441-82k2b",
+      "timestamp": "2026-11-14T10:33:17.441Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "lab",
+      "componentId": "lab-run",
+      "ctComponent": "debugging",
+      "result": "pass",
+      "attemptNo": 4,
+      "payload": {
+        "stdout": "barang =  nasgor\nharga =  21\njumlah =  2\ntotal =  42\n"
+      }
+    },
+    {
+      "id": "evt-1794652398988-26xyi",
+      "timestamp": "2026-11-14T10:33:18.988Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "lab",
+      "componentId": "lab-submit-test",
+      "ctComponent": "generalization",
+      "result": "pass",
+      "attemptNo": 5,
+      "payload": {
+        "visiblePassed": 3,
+        "hiddenPassed": 2
+      }
+    },
+    {
+      "id": "evt-1794652410803-uk1n7",
+      "timestamp": "2026-11-14T10:33:30.803Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "lab",
+      "componentId": "lab-submit-test",
+      "ctComponent": "generalization",
+      "result": "fail",
+      "attemptNo": 6,
+      "payload": {
+        "visiblePassed": 2,
+        "hiddenPassed": 1
+      }
+    },
+    {
+      "id": "evt-1794652417062-nrxp1",
+      "timestamp": "2026-11-14T10:33:37.062Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "lab",
+      "componentId": "lab-submit-test",
+      "ctComponent": "generalization",
+      "result": "pass",
+      "attemptNo": 7,
+      "payload": {
+        "visiblePassed": 3,
+        "hiddenPassed": 2
+      }
+    },
+    {
+      "id": "evt-1794652450514-woxqj",
+      "timestamp": "2026-11-14T10:34:10.514Z",
+      "studentId": "user-1794646244649",
+      "studentName": "Belva R. Aydina",
+      "groupId": "Kelompok 2",
+      "materi": 1,
+      "stage": "posttest",
+      "componentId": "posttest-submit",
+      "ctComponent": "generalization",
+      "result": "info",
+      "attemptNo": 1,
+      "payload": {
+        "score": 100,
+        "correctCount": 5,
+        "totalQuestions": 5,
+        "selectedAnswers": {
+          "0": 0,
+          "1": 0,
+          "2": 0,
+          "3": 0,
+          "4": 0
+        },
+        "reasons": {
+          "0": "karena",
+          "1": "krenasd",
+          "2": "gtrgbnjhh",
+          "3": "rdtfyj",
+          "4": "klioy7yu"
+        }
+      }
+    }
+  ],
+  "posttestLockedByGuru": false
+}

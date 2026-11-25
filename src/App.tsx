@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router';
 import { AppShell } from './components/layout/AppShell';
 import { useAppStore } from './store/useAppStore';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
-
+ 
 const LoginPage        = lazy(() => import('./pages/LoginPage'));
 const DaftarPage       = lazy(() => import('./pages/DaftarPage'));
 const BerandaPage      = lazy(() => import('./pages/BerandaPage'));
@@ -13,10 +13,9 @@ const DekomposisiPage  = lazy(() => import('./pages/DekomposisiPage'));
 const ParsonsPage      = lazy(() => import('./pages/ParsonsPage'));
 const LabPage          = lazy(() => import('./pages/LabPage'));
 const TestPage         = lazy(() => import('./pages/TestPage'));
-const PilihKelompokPage = lazy(() => import('./pages/PilihKelompokPage'));
+const DiskusiPage      = lazy(() => import('./pages/DiskusiPage'));
 const GuruPage         = lazy(() => import('./pages/GuruPage'));
 const GuruKelasPage    = lazy(() => import('./pages/guru/GuruKelasPage'));
-const GuruKelompokPage = lazy(() => import('./pages/guru/GuruKelompokPage'));
 const GuruKemajuanPage = lazy(() => import('./pages/guru/GuruKemajuanPage'));
 const GuruCtPage       = lazy(() => import('./pages/guru/GuruCtPage'));
 const GuruEksporPage        = lazy(() => import('./pages/guru/GuruEksporPage'));
@@ -78,14 +77,6 @@ export default function App() {
             }
           >
             {/* Rute khusus siswa — guru dialihkan ke dasbor guru */}
-            <Route
-              path="/pilih-kelompok"
-              element={
-                <RoleRoute allow="siswa" redirectTo="/guru">
-                  <PilihKelompokPage />
-                </RoleRoute>
-              }
-            />
             <Route
               path="/beranda"
               element={
@@ -152,6 +143,14 @@ export default function App() {
                 </RoleRoute>
               }
             />
+            <Route
+              path="/diskusi"
+              element={
+                <RoleRoute allow="siswa" redirectTo="/guru">
+                  <DiskusiPage />
+                </RoleRoute>
+              }
+            />
 
             {/* Guru routes */}
             <Route
@@ -167,14 +166,6 @@ export default function App() {
               element={
                 <RoleRoute allow="guru" redirectTo="/beranda">
                   <GuruKelasPage />
-                </RoleRoute>
-              }
-            />
-            <Route
-              path="/guru/kelompok"
-              element={
-                <RoleRoute allow="guru" redirectTo="/beranda">
-                  <GuruKelompokPage />
                 </RoleRoute>
               }
             />

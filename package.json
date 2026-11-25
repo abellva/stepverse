@@ -4,9 +4,11 @@
     "version": "1.0.0",
     "type": "module",
     "scripts": {
-        "dev": "vite",
+        "dev": "tsx server.ts",
         "build": "vite build",
-        "preview": "vite preview",
+        "start": "node server.ts",
+        "preview": "vite preview --port 3000 --host 0.0.0.0",
+        "lint": "tsc --noEmit",
         "format": "oxfmt"
     },
     "dependencies": {
@@ -19,11 +21,14 @@
         "@dnd-kit/utilities": "^3.2.2",
         "@fontsource/jetbrains-mono": "^5.3.0",
         "@fontsource/nunito-sans": "^5.3.0",
+        "@types/express": "^5.0.6",
         "codemirror": "^6.0.2",
+        "express": "^5.3.0",
         "pyodide": "^314.0.7",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
         "react-router": "^8.5.1",
+        "tsx": "^4.23.15",
         "zustand": "^5.1.0"
     },
     "devDependencies": {

@@ -9,27 +9,7 @@ import { translatePythonError, TranslatedError } from '../utils/pythonErrorTrans
 import { runCodeTests, TestSuiteSummary } from '../utils/testRunner';
 import { logEvent } from '../services/logger';
 
-const DEFAULT_STARTER_CODE = `# Program Kasir Kantin Bu Ani (Materi 1: Variabel & Penugasan Nilai)
-# Lengkapi variabel dan formula di bawah ini agar struk kasir berhasil tercetak:
-
-# 1. Masukkan nama barang (Tipe String diapit tanda petik, contoh: "Nasi Goreng" atau "nasgor"):
-nama_barang = ""
-
-# 2. Masukkan harga satuan dan jumlah beli (Tipe Integer angka tanpa petik, contoh: 15000 dan 2):
-harga_satuan = 0
-jumlah = 0
-
-# 3. Hitung total belanja (kalikan variabel harga_satuan dengan jumlah):
-total = 0
-
-# 4. Cetak struk kasir ke layar:
-print("=== STRUK KASIR KANTIN BU ANI ===")
-print("Barang :", nama_barang)
-print("Harga  : Rp", harga_satuan)
-print("Jumlah :", jumlah)
-print("Total  : Rp", total)
-print("=================================")
-`;
+const DEFAULT_STARTER_CODE = '';
 
 export default function LabPage() {
   const { id } = useParams<{ id: string }>();
@@ -37,13 +17,19 @@ export default function LabPage() {
   const materiId = Number(id);
   const materi = MATERI_LIST.find((m) => m.id === materiId);
 
-  const { setProgress, setAnswer, demoMode, progress } = useAppStore();
+  const { setProgress, setAnswer, demoMode, progress, enterStage, recordStageFailure, answers } = useAppStore();
 
-  const [code, setCode] = useState(DEFAULT_STARTER_CODE);
+  const savedCode = answers[`${materiId}-lab-code`] as string | undefined;
+  const [code, setCode] = useState(savedCode ?? DEFAULT_STARTER_CODE);
   const [isRunning, setIsRunning] = useState(false);
   const [terminalOutput, setTerminalOutput] = useState<string>('');
   const [execStatus, setExecStatus] = useState<'idle' | 'success' | 'error' | 'timeout'>('idle');
   const [translatedError, setTranslatedError] = useState<TranslatedError | null>(null);
+
+  function handleCodeChange(newCode: string) {
+    setCode(newCode);
+    setAnswer(`${materiId}-lab-code`, newCode);
+  }
 
   // Test suite state
   const [testSummary, setTestSummary] = useState<TestSuiteSummary | null>(null);
@@ -52,10 +38,8 @@ export default function LabPage() {
   const canProceed = progress[`${materiId}-lab`] === 'done' || testSummary?.overallPass;
 
   useEffect(() => {
-    if (progress[`${materiId}-lab`] === 'done') {
-      // restore completed state
-    }
-  }, [materiId, progress]);
+    enterStage('lab');
+  }, [enterStage, materiId]);
 
   if (!materi) return <div className="p-6 text-red-500">Materi tidak ditemukan.</div>;
 
@@ -81,6 +65,7 @@ export default function LabPage() {
         payload: { stdout: res.stdout },
       });
     } else if (res.status === 'error') {
+      recordStageFailure('lab');
       const translated = translatePythonError(res.error || res.stderr);
       setTranslatedError(translated);
       setTerminalOutput(res.stderr || res.error || 'Terjadi kesalahan eksekusi.');
@@ -93,6 +78,7 @@ export default function LabPage() {
         payload: { errorType: translated.type, raw: res.error },
       });
     } else if (res.status === 'timeout') {
+      recordStageFailure('lab');
       setTerminalOutput('⚠️ Batas waktu eksekusi 5 detik terlampaui. Program dihentikan paksa.');
       logEvent({
         stage: 'lab',
@@ -124,7 +110,7 @@ export default function LabPage() {
       setTerminalOutput(res.stderr || res.error || 'Kesalahan eksekusi.');
     }
 
-    // Run visible and hidden test cases
+    // Run visible and hidden test cases (adaptif terhadap variasi nama variabel)
     const summary = runCodeTests(code, res);
     setTestSummary(summary);
 
@@ -144,6 +130,8 @@ export default function LabPage() {
       setProgress(materiId, 'lab', 'done');
       setAnswer(`${materiId}-lab-score`, 100);
       setAnswer('lab_score', 100);
+    } else {
+      recordStageFailure('lab');
     }
   }
 
@@ -166,7 +154,7 @@ export default function LabPage() {
         </div>
         <h1 className="text-2xl font-bold text-[#121c2c]">{materi.judul}</h1>
         <p className="text-sm text-[#464555] mt-1 leading-relaxed">
-          <strong>Komponen Berpikir Komputasional: Debugging, Iterasi, & Generalisasi.</strong><br />
+          <strong>Komponen Berpikir Komputasional: Debugging, Iterasi, &amp; Generalisasi.</strong><br />
           Tulis dan uji program kasir menggunakan bahasa Python asli di browser tanpa perlu instalasi.
         </p>
       </div>
@@ -198,7 +186,7 @@ export default function LabPage() {
                   boxShadow: 'inset 1px 1px 2px rgba(0,106,98,0.2)',
                 }}
               >
-                Bebas nama &amp; harga makanan
+                Penamaan variabel fleksibel
               </span>
             </div>
 
@@ -212,7 +200,7 @@ export default function LabPage() {
             </div>
 
             <p className="text-xs text-[#464555] leading-relaxed">
-              💡 <strong>Misi Kamu:</strong> Pada editor di bawah, lengkapi variabel <code>nama_barang</code> (teks dalam tanda petik), <code>harga_satuan</code> &amp; <code>jumlah</code> (angka positif), serta isi rumus <code>total</code> agar nilai struk terkalkulasi otomatis.
+              💡 <strong>Misi Kamu:</strong> Tulis kode program kasir dari awal secara mandiri! Buat variabel nama barang (String diapit tanda petik), harga satuan dan jumlah beli (Integer tanpa tanda petik), hitung total belanja dengan rumus perkalian, lalu cetak struk kasir menggunakan fungsi <code>print()</code>.
             </p>
           </div>
 
@@ -220,27 +208,21 @@ export default function LabPage() {
             <div className="flex items-center justify-between flex-wrap gap-2">
               <span className="font-bold text-xs uppercase tracking-wider text-[#253f8a] flex items-center gap-1.5">
                 <span>💻</span>
-                <span>Editor Python (CodeMirror 6)</span>
+                <span>Editor Python Mandiri (CodeMirror 6)</span>
               </span>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-mono text-[#888]">
-                  Uji Coba: <strong>{iterations}x</strong>
+                  Iterasi: <strong>{iterations}x</strong>
                 </span>
-                <span
-                  className={`text-xs font-mono font-bold px-2.5 py-0.5 rounded-full border ${
-                    canProceed
-                      ? 'bg-green-100 text-green-800 border-green-300'
-                      : 'bg-blue-50 text-blue-800 border-blue-200'
-                  }`}
-                >
-                  {canProceed ? '⭐ Status: Lulus Uji Kasus (100)' : '⏳ Status: Proses Eksplorasi'}
+                <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full border bg-[#eaf6ff] text-[#253f8a] border-[#bce0fd]">
+                  {canProceed ? '✅ Tuntas (100/100)' : 'Latihan Mandiri'}
                 </span>
               </div>
             </div>
 
             <PythonEditor
               value={code}
-              onChange={setCode}
+              onChange={handleCodeChange}
               className="h-[340px]"
             />
 
@@ -248,10 +230,10 @@ export default function LabPage() {
             <div className="flex items-center justify-between pt-1 flex-wrap gap-2">
               <button
                 type="button"
-                onClick={() => setCode(DEFAULT_STARTER_CODE)}
+                onClick={() => handleCodeChange(DEFAULT_STARTER_CODE)}
                 className="text-xs text-[#464555] hover:text-[#253f8a] underline"
               >
-                Reset ke Kode Awal
+                Hapus / Kosongkan Editor
               </button>
 
               <div className="flex items-center gap-2.5">
@@ -286,49 +268,18 @@ export default function LabPage() {
             </div>
           </Card>
 
-          {/* Peran Guru Sebagai Fasilitator Kelas (Menggantikan Hint Ladder) */}
-          <div
-            className="rounded-[28px] p-4 flex flex-col gap-2.5 transition-all"
-            style={{
-              background: iterations >= 3 || translatedError
-                ? 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)'
-                : 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-              border: iterations >= 3 || translatedError
-                ? '1.5px solid #fde68a'
-                : '1.5px solid #e2e8f0',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
-            }}
-          >
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-xs uppercase tracking-wider text-[#1e293b] flex items-center gap-1.5">
-                <span>🤝</span>
-                <span>Peran Guru Sebagai Fasilitator Kelas</span>
-              </span>
-              {(iterations >= 3 || translatedError) && (
-                <span className="text-[10px] font-bold bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full animate-pulse">
-                  Perlu Bimbingan Guru
+          {/* Kolaborasi & Fasilitator Guru (menggantikan sistem Hint & pengurangan poin) */}
+          <Card className="border border-[#bce0fd] p-4 bg-[#f8fbff]">
+            <div className="flex items-start gap-3">
+              <span className="text-xl shrink-0">👩‍🏫</span>
+              <div className="text-xs text-[#464555] leading-relaxed">
+                <span className="font-bold text-[#253f8a] block mb-0.5">
+                  Diskusi Kelompok &amp; Bimbingan Fasilitator
                 </span>
-              )}
-            </div>
-
-            <p className="text-xs text-[#475569] leading-relaxed">
-              Sistem tidak menyediakan tombol bocoran atau pengurangan poin otomatis. Jika kelompokmu mengalami kebuntuan logika atau uji kasus belum lolos:
-            </p>
-
-            <div className="p-3 rounded-2xl bg-white/80 border border-slate-200 text-xs text-[#334155] flex flex-col gap-1.5">
-              <div className="font-semibold text-[#1e293b] flex items-center gap-1.5">
-                <span>💡</span>
-                <span>Langkah Refleksi &amp; Diskusi:</span>
+                Tidak ada tombol bantuan otomatis atau pengurangan poin. Jika mengalami kendala memahami pesan error, diskusikan bersama anggota kelompokmu melalui <strong>Chat Kelompok</strong> di kanan bawah atau tanyakan langsung kepada <strong>Guru</strong> di kelas.
               </div>
-              <ul className="list-disc pl-4 space-y-1 text-[11px] text-[#475569]">
-                <li>Diskusikan bersama rekan kelompok: apakah rumus perkalian <code>total = harga * jumlah</code> sudah sesuai urutan?</li>
-                <li>Periksa pesan galat ramah di panel kanan jika terjadi error sintaks/tipe data.</li>
-                <li>
-                  <strong>Panggil Guru di Kelas:</strong> Guru berperan mendampingi kelompok yang membutuhkan scaffold berpikir logika komputasi.
-                </li>
-              </ul>
             </div>
-          </div>
+          </Card>
         </div>
 
         {/* Right Column: Terminal & Friendly Error & Tests */}

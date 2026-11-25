@@ -1,6 +1,7 @@
-// Adaptive & Conditional Test Runner for Python Lab
+// Adaptive & Flexible Test Runner for Python Lab
 // CT Components: Debugging & Generalization (Shute et al., 2017)
-// Fully adaptive to student-defined values (e.g. "nasgor", 150) with transparent test cases
+// Adapts to student-defined variable names (e.g. jumlah_porsi, porsi, qty, total_harga, menu)
+// while strictly validating Python data types and dynamic multiplication logic.
 
 import { ExecutionResult } from '../services/pyodideService';
 
@@ -33,210 +34,343 @@ export interface TestSuiteSummary {
   testResults: TestCaseResult[];
 }
 
+interface AssignmentEntry {
+  name: string;
+  expr: string;
+  rawExpr: string;
+  hasTrailingSemicolon: boolean;
+  lineIndex: number;
+}
+
 /** Helper to extract variable assignments statically from user code */
-function extractStaticAssignments(code: string): Record<string, string> {
-  const result: Record<string, string> = {};
+function extractStaticAssignments(code: string): {
+  map: Record<string, string>;
+  list: AssignmentEntry[];
+} {
+  const map: Record<string, string> = {};
+  const list: AssignmentEntry[] = [];
   const lines = code.split('\n');
 
-  for (const rawLine of lines) {
+  lines.forEach((rawLine, lineIndex) => {
     let line = rawLine.trim();
-    if (!line || line.startsWith('#')) continue;
+    if (!line || line.startsWith('#')) return;
 
-    // Strip trailing comments
-    const commentIdx = line.indexOf('#');
-    if (commentIdx !== -1) {
-      line = line.substring(0, commentIdx).trim();
+    // Strip trailing comments outside quotes
+    let inQuote = false;
+    let quoteChar = '';
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if ((ch === '"' || ch === "'") && (i === 0 || line[i - 1] !== '\\')) {
+        if (!inQuote) {
+          inQuote = true;
+          quoteChar = ch;
+        } else if (ch === quoteChar) {
+          inQuote = false;
+        }
+      } else if (ch === '#' && !inQuote) {
+        line = line.substring(0, i).trim();
+        break;
+      }
     }
+    if (!line) return;
 
     const match = line.match(/^([a-zA-Z_]\w*)\s*=\s*([\s\S]+)$/);
     if (match) {
       const varName = match[1].trim();
-      const expr = match[2].trim();
-      result[varName] = expr;
+      const rawExpr = match[2].trim();
+      const hasTrailingSemicolon = rawExpr.endsWith(';');
+      const expr = rawExpr.replace(/;\s*$/, '').trim();
+      map[varName] = expr;
+      list.push({ name: varName, expr, rawExpr, hasTrailingSemicolon, lineIndex });
     }
-  }
+  });
 
-  return result;
+  return { map, list };
 }
+
+function isQuotedLiteral(expr: string | undefined): boolean {
+  if (!expr) return false;
+  const t = expr.trim();
+  return (
+    (t.startsWith('"') && t.endsWith('"') && t.length >= 2) ||
+    (t.startsWith("'") && t.endsWith("'") && t.length >= 2)
+  );
+}
+
+function stripQuotes(expr: string): string {
+  const t = expr.trim();
+  if (isQuotedLiteral(t)) return t.slice(1, -1);
+  return t.replace(/['"]/g, '');
+}
+
+function isNumericLiteral(expr: string | undefined): boolean {
+  if (!expr) return false;
+  return /^-?\d+(\.\d+)?$/.test(expr.trim());
+}
+
+const ITEM_NAME_RE = /^(nama_barang|nama_makanan|nama_minuman|nama_menu|nama_produk|nama_item|barang|menu|makanan|minuman|produk|item|nama)$/i;
+const PRICE_NAME_RE = /harga|price|tarif|biaya|satuan/i;
+const QTY_NAME_RE = /jumlah|jml|porsi|banyak|qty|kuantitas|unit/i;
+const TOTAL_NAME_RE = /total|subtotal|bayar|tagihan|hasil/i;
 
 export function runCodeTests(
   code: string,
   execResult: ExecutionResult
 ): TestSuiteSummary {
   const vars = execResult.variables || {};
-  const staticAssignments = extractStaticAssignments(code);
+  const { map: staticAssignments, list: assignmentList } = extractStaticAssignments(code);
   const stdout = execResult.stdout || '';
   const testResults: TestCaseResult[] = [];
 
-  // Deteksi nama variabel secara fleksibel & adaptif (tidak kaku/hardcoded)
-  const namaKey =
-    ['nama_barang', 'nama', 'barang', 'item', 'menu', 'nama_makanan', 'nama_item', 'namabarang'].find(
-      (k) => vars[k] !== undefined || staticAssignments[k] !== undefined
-    ) ||
-    Object.keys(staticAssignments).find((k) => {
-      const v = staticAssignments[k] || '';
-      return (
-        (v.startsWith('"') || v.startsWith("'")) &&
-        !['total', 'harga', 'hrg', 'jumlah', 'jml', 'qty'].some((p) => k.toLowerCase().includes(p))
-      );
-    }) ||
-    'nama_barang';
-
-  const hargaKey =
-    ['harga_satuan', 'harga', 'hrg', 'price', 'harga_barang', 'hargasatuan'].find(
-      (k) => vars[k] !== undefined || staticAssignments[k] !== undefined
-    ) ||
-    Object.keys(staticAssignments).find((k) => ['harga', 'hrg', 'price'].some((p) => k.toLowerCase().includes(p))) ||
-    'harga_satuan';
-
-  const jumlahKey =
-    ['jumlah', 'jml', 'qty', 'banyak', 'jumlah_beli', 'porsi', 'jumlah_porsi', 'kuantitas'].find(
-      (k) => vars[k] !== undefined || staticAssignments[k] !== undefined
-    ) ||
-    Object.keys(staticAssignments).find((k) => ['jumlah', 'jml', 'qty', 'porsi'].some((p) => k.toLowerCase().includes(p))) ||
-    'jumlah';
-
-  const totalKey =
-    ['total', 'total_harga', 'total_bayar', 'bayar', 'subtotal', 'tot'].find(
-      (k) => vars[k] !== undefined || staticAssignments[k] !== undefined
-    ) ||
-    Object.keys(staticAssignments).find((k) => ['total', 'bayar'].some((p) => k.toLowerCase().includes(p))) ||
-    'total';
-
   // =========================================================================
-  // 1. VISIBLE TEST 1: Variabel Nama Barang (Tipe Data String)
-  // Fleksibel terhadap nama variabel siswa (nama_barang, menu, barang, dll.)
+  // 1. VISIBLE TEST 1: Variabel Nama Barang / Menu (Tipe Data String)
+  // Fleksibel terhadap berbagai nama variabel (nama_barang, menu, nama_makanan, item, dll.)
   // =========================================================================
   let test1Passed = false;
   let test1Actual = '';
   let test1Feedback = '';
 
-  const staticNama = staticAssignments[namaKey];
-  const runtimeNama = vars[namaKey];
+  const allVarNames = Object.keys(staticAssignments);
 
-  if (typeof runtimeNama === 'string' && runtimeNama.trim().length > 0) {
-    test1Passed = true;
-    test1Actual = `${namaKey} = "${runtimeNama}" (Tipe data: String)`;
-    test1Feedback = `Sesuai kaidah! Variabel '${namaKey}' berhasil menyimpan teks "${runtimeNama}" sebagai tipe data String yang valid.`;
-  } else if (staticNama !== undefined) {
-    const isQuoted =
-      (staticNama.startsWith('"') && staticNama.endsWith('"') && staticNama.length >= 2) ||
-      (staticNama.startsWith("'") && staticNama.endsWith("'") && staticNama.length >= 2);
+  // Cari kandidat variabel nama item:
+  // 1) Cocok pola nama item
+  // 2) Atau variabel runtime bertipe string bukan angka
+  const namaVarName =
+    allVarNames.find((k) => k === 'nama_barang') ??
+    allVarNames.find((k) => ITEM_NAME_RE.test(k)) ??
+    allVarNames.find(
+      (k) =>
+        !PRICE_NAME_RE.test(k) &&
+        !QTY_NAME_RE.test(k) &&
+        !TOTAL_NAME_RE.test(k) &&
+        (typeof vars[k] === 'string' ||
+          isQuotedLiteral(staticAssignments[k]) ||
+          (!isNumericLiteral(staticAssignments[k]) && !/[+\-*/()]/.test(staticAssignments[k])))
+    );
 
-    const contentInside = isQuoted ? staticNama.slice(1, -1).trim() : '';
+  if (namaVarName) {
+    const staticNama = staticAssignments[namaVarName];
+    const runtimeNama = vars[namaVarName];
+    const namaEntry = assignmentList.find((a) => a.name === namaVarName);
 
-    if (isQuoted && contentInside.length === 0) {
+    if (namaEntry?.hasTrailingSemicolon) {
       test1Passed = false;
-      test1Actual = `${namaKey} = "" (Teks masih kosong)`;
-      test1Feedback = `Nama barang di variabel '${namaKey}' masih kosong. Isilah nama barang di dalam tanda petik, contoh: ${namaKey} = "Nasi Goreng".`;
-    } else if (isQuoted) {
+      test1Actual = `${namaVarName} = ${namaEntry.rawExpr} (Mengandung tanda titik koma ;)`;
+      test1Feedback = `Terdapat tanda titik koma (;) pada baris '${namaVarName}'. Dalam Python, tanda titik koma (;) di akhir baris tidak diperlukan. Silakan hapus tanda titik koma tersebut: '${namaVarName} = ${namaEntry.expr}'.`;
+    } else if (typeof runtimeNama === 'string' && runtimeNama.trim().length > 0) {
       test1Passed = true;
-      test1Actual = `${namaKey} = ${staticNama} (Tipe data: String)`;
-      test1Feedback = `Sesuai kaidah! Variabel '${namaKey}' berisi teks ${staticNama} dalam tanda petik.`;
-    } else if (!isNaN(Number(staticNama))) {
-      test1Passed = false;
-      test1Actual = `${namaKey} = ${staticNama} (Tipe data: Angka/Integer)`;
-      test1Feedback = `Nama barang diisi angka (${staticNama}). Nama makanan/barang wajib berupa teks String dalam tanda petik.`;
-    } else {
-      test1Passed = false;
-      test1Actual = `${namaKey} = ${staticNama} (Teks tanpa tanda petik)`;
-      test1Feedback = `Teks ${staticNama} belum diapit tanda petik. Dalam bahasa Python, setiap data teks (String) wajib menggunakan tanda petik: ${namaKey} = "${staticNama}".`;
+      test1Actual = `${namaVarName} = "${runtimeNama}" (Tipe data: String)`;
+      test1Feedback = `Sesuai kaidah! Variabel '${namaVarName}' berhasil menyimpan teks "${runtimeNama}" sebagai tipe data String yang valid.`;
+    } else if (staticNama !== undefined) {
+      const quoted = isQuotedLiteral(staticNama);
+      const contentInside = quoted ? staticNama.slice(1, -1).trim() : '';
+
+      if (quoted && contentInside.length === 0) {
+        test1Passed = false;
+        test1Actual = `${namaVarName} = "" (Teks masih kosong)`;
+        test1Feedback = `Variabel '${namaVarName}' masih kosong. Isilah nama makanan/barang di dalam tanda petik, contoh: ${namaVarName} = "Nasi Goreng" atau "nasgor".`;
+      } else if (quoted) {
+        test1Passed = true;
+        test1Actual = `${namaVarName} = ${staticNama} (Tipe data: String)`;
+        test1Feedback = `Sesuai kaidah! Variabel '${namaVarName}' berisi teks ${staticNama} dalam tanda petik.`;
+      } else if (isNumericLiteral(staticNama)) {
+        test1Passed = false;
+        test1Actual = `${namaVarName} = ${staticNama} (Tipe data: Angka/Integer)`;
+        test1Feedback = `Variabel '${namaVarName}' diisi angka (${staticNama}). Nama barang wajib berupa teks String dalam tanda petik, contoh: ${namaVarName} = "nasgor".`;
+      } else {
+        test1Passed = false;
+        test1Actual = `${namaVarName} = ${staticNama} (Teks tanpa tanda petik)`;
+        test1Feedback = `Teks ${staticNama} pada variabel '${namaVarName}' belum diapit tanda petik. Dalam Python, data teks (String) wajib menggunakan tanda petik: ${namaVarName} = "${staticNama}".`;
+      }
     }
   } else {
     test1Passed = false;
-    test1Actual = `Variabel nama barang belum dibuat`;
-    test1Feedback = `Buatlah variabel untuk nama barang (misal: ${namaKey} = "Nasi Goreng" atau menu = "Es Teh").`;
+    test1Actual = 'Variabel nama barang/menu belum dibuat';
+    test1Feedback =
+      'Buatlah variabel bertipe teks String untuk menyimpan nama barang/menu, contoh: nama_barang = "nasgor" atau menu = "Mie Ayam".';
   }
 
   testResults.push({
     id: 'test_nama',
-    title: `Uji 1: Variabel Nama Barang (${namaKey})`,
-    description: 'Menyimpan nama barang kasir ke dalam variabel dengan tipe data String (teks diapit tanda petik).',
+    title: 'Uji 1: Variabel Nama Barang (String)',
+    description:
+      'Menyimpan nama barang/menu ke dalam variabel (nama variabel bebas tanpa spasi) dengan tipe data String (diapit tanda petik).',
     isHidden: false,
     passed: test1Passed,
-    expectedDescription: `${namaKey} = "..." (teks bebas diapit tanda petik)`,
+    expectedDescription: 'variabel_nama = "..." (nama variabel bebas, teks diapit tanda petik)',
     actualOutput: test1Actual,
     feedback: test1Feedback,
   });
 
   // =========================================================================
-  // 2. VISIBLE TEST 2: Variabel Harga, Jumlah, dan Perhitungan Total
-  // Fleksibel terhadap nama variabel siswa (harga_satuan/harga, jumlah/jml/qty, total)
-  // dan urutan perkalian (harga * jumlah atau jumlah * harga).
+  // 2. VISIBLE TEST 2: Variabel Harga, Jumlah/Porsi, dan Formula Perkalian Total
+  // Fleksibel terhadap nama variabel apa pun (jumlah, jumlah_porsi, porsi, qty, banyak, harga, total_harga, dll.)
   // =========================================================================
   let test2Passed = false;
   let test2Actual = '';
   let test2Feedback = '';
 
-  const staticHarga = staticAssignments[hargaKey];
-  const staticJumlah = staticAssignments[jumlahKey];
-  const staticTotal = staticAssignments[totalKey];
+  // Deteksi pola formula perkalian: totalVar = opA * opB (dengan dua identifier variabel)
+  const mulEntry = assignmentList.find((entry) =>
+    /^([a-zA-Z_]\w*)\s*\*\s*([a-zA-Z_]\w*)$/.test(entry.expr.replace(/\s+/g, ' '))
+  );
+  const mulMatch = mulEntry?.expr.trim().match(/^([a-zA-Z_]\w*)\s*\*\s*([a-zA-Z_]\w*)$/);
 
-  const hargaNum = vars[hargaKey] !== undefined ? Number(vars[hargaKey]) : Number(staticHarga);
-  const jumlahNum = vars[jumlahKey] !== undefined ? Number(vars[jumlahKey]) : Number(staticJumlah);
-  const totalNum = vars[totalKey] !== undefined ? Number(vars[totalKey]) : Number(staticTotal);
+  // Deteksi pola kesalahan penjumlahan: totalVar = opA + opB
+  const addEntry = assignmentList.find(
+    (entry) =>
+      TOTAL_NAME_RE.test(entry.name) &&
+      /^([a-zA-Z_]\w*)\s*\+\s*([a-zA-Z_]\w*)$/.test(entry.expr.trim())
+  );
+  const addMatch = addEntry?.expr.trim().match(/^([a-zA-Z_]\w*)\s*\+\s*([a-zA-Z_]\w*)$/);
 
-  const isHargaQuoted = staticHarga ? (staticHarga.startsWith('"') || staticHarga.startsWith("'")) : false;
-  const isJumlahQuoted = staticJumlah ? (staticJumlah.startsWith('"') || staticJumlah.startsWith("'")) : false;
+  let hargaVarName: string | undefined;
+  let jumlahVarName: string | undefined;
+  let totalVarName: string | undefined;
 
-  const codeNormalized = code.replace(/\s+/g, '');
-  const hasMultiplyFormula =
-    codeNormalized.includes(`${totalKey}=${hargaKey}*${jumlahKey}`) ||
-    codeNormalized.includes(`${totalKey}=${jumlahKey}*${hargaKey}`) ||
-    codeNormalized.includes('total=harga_satuan*jumlah') ||
-    codeNormalized.includes('total=jumlah*harga_satuan') ||
-    codeNormalized.includes('total=harga*jumlah') ||
-    codeNormalized.includes('total=jumlah*harga') ||
-    codeNormalized.includes('total=harga*jml') ||
-    codeNormalized.includes('total=jml*harga') ||
-    new RegExp(`${totalKey}=(${hargaKey}|${jumlahKey})\\*(${hargaKey}|${jumlahKey})`).test(codeNormalized);
+  if (mulEntry && mulMatch) {
+    totalVarName = mulEntry.name;
+    const opA = mulMatch[1];
+    const opB = mulMatch[2];
+    if (QTY_NAME_RE.test(opA) && !QTY_NAME_RE.test(opB)) {
+      jumlahVarName = opA;
+      hargaVarName = opB;
+    } else if (PRICE_NAME_RE.test(opB) && !PRICE_NAME_RE.test(opA)) {
+      jumlahVarName = opA;
+      hargaVarName = opB;
+    } else {
+      hargaVarName = opA;
+      jumlahVarName = opB;
+    }
+  } else if (addEntry && addMatch) {
+    totalVarName = addEntry.name;
+    const opA = addMatch[1];
+    const opB = addMatch[2];
+    if (QTY_NAME_RE.test(opA) && !QTY_NAME_RE.test(opB)) {
+      jumlahVarName = opA;
+      hargaVarName = opB;
+    } else {
+      hargaVarName = opA;
+      jumlahVarName = opB;
+    }
+  } else {
+    hargaVarName =
+      allVarNames.find((k) => k === 'harga_satuan') ??
+      allVarNames.find((k) => PRICE_NAME_RE.test(k) && !TOTAL_NAME_RE.test(k));
+    jumlahVarName =
+      allVarNames.find((k) => k === 'jumlah') ??
+      allVarNames.find((k) => QTY_NAME_RE.test(k) && !TOTAL_NAME_RE.test(k));
+    totalVarName =
+      allVarNames.find((k) => k === 'total') ??
+      allVarNames.find((k) => TOTAL_NAME_RE.test(k));
+  }
 
-  const hasAddFormula =
-    codeNormalized.includes(`${totalKey}=${hargaKey}+${jumlahKey}`) ||
-    codeNormalized.includes(`${totalKey}=${jumlahKey}+${hargaKey}`);
+  const staticHarga = hargaVarName ? staticAssignments[hargaVarName] : undefined;
+  const staticJumlah = jumlahVarName ? staticAssignments[jumlahVarName] : undefined;
+  const staticTotal = totalVarName ? staticAssignments[totalVarName] : undefined;
 
-  if (isHargaQuoted) {
+  const hargaNum =
+    hargaVarName && vars[hargaVarName] !== undefined
+      ? Number(vars[hargaVarName])
+      : staticHarga !== undefined
+      ? Number(staticHarga)
+      : NaN;
+  const jumlahNum =
+    jumlahVarName && vars[jumlahVarName] !== undefined
+      ? Number(vars[jumlahVarName])
+      : staticJumlah !== undefined
+      ? Number(staticJumlah)
+      : NaN;
+  const totalNum =
+    totalVarName && vars[totalVarName] !== undefined
+      ? Number(vars[totalVarName])
+      : staticTotal !== undefined
+      ? Number(staticTotal)
+      : NaN;
+
+  const isHargaQuoted = isQuotedLiteral(staticHarga);
+  const isJumlahQuoted = isQuotedLiteral(staticJumlah);
+
+  // Pastikan kedua operan didefinisikan sebelum baris formula perkalian
+  const hargaEntryIdx = assignmentList.findIndex((a) => a.name === hargaVarName);
+  const jumlahEntryIdx = assignmentList.findIndex((a) => a.name === jumlahVarName);
+  const hasMultiplyFormula = Boolean(
+    mulEntry &&
+      mulMatch &&
+      hargaVarName &&
+      jumlahVarName &&
+      hargaEntryIdx !== -1 &&
+      jumlahEntryIdx !== -1 &&
+      hargaEntryIdx < assignmentList.indexOf(mulEntry) &&
+      jumlahEntryIdx < assignmentList.indexOf(mulEntry)
+  );
+  const hasAddFormula = Boolean(addEntry && addMatch);
+
+  const hargaEntry = assignmentList.find((a) => a.name === hargaVarName);
+  const jumlahEntry = assignmentList.find((a) => a.name === jumlahVarName);
+
+  if (isHargaQuoted && hargaVarName) {
     test2Passed = false;
-    test2Actual = `${hargaKey} = ${staticHarga} (Tipe String dalam tanda petik)`;
-    test2Feedback = `Nilai harga ${staticHarga} diapit tanda petik sehingga dibaca sebagai teks. Hapus tanda petik agar bertipe Integer murni: ${hargaKey} = ${staticHarga.replace(/['"]/g, '')}.`;
-  } else if (isJumlahQuoted) {
+    test2Actual = `${hargaVarName} = ${staticHarga} (Tipe String dalam tanda petik)`;
+    test2Feedback = `Nilai '${hargaVarName}' (${staticHarga}) diapit tanda petik sehingga dibaca sebagai teks. Hapus tanda petik agar bertipe angka Integer: ${hargaVarName} = ${stripQuotes(staticHarga ?? '')}.`;
+  } else if (isJumlahQuoted && jumlahVarName) {
     test2Passed = false;
-    test2Actual = `${jumlahKey} = ${staticJumlah} (Tipe String dalam tanda petik)`;
-    test2Feedback = `Nilai jumlah ${staticJumlah} diapit tanda petik. Hapus tanda petik agar berupa angka bulat: ${jumlahKey} = ${staticJumlah.replace(/['"]/g, '')}.`;
-  } else if (isNaN(hargaNum) || hargaNum <= 0) {
+    test2Actual = `${jumlahVarName} = ${staticJumlah} (Tipe String dalam tanda petik)`;
+    test2Feedback = `Nilai '${jumlahVarName}' (${staticJumlah}) diapit tanda petik. Hapus tanda petik agar berupa angka bulat: ${jumlahVarName} = ${stripQuotes(staticJumlah ?? '')}.`;
+  } else if (hargaEntry?.hasTrailingSemicolon) {
     test2Passed = false;
-    test2Actual = staticHarga ? `${hargaKey} = ${staticHarga}` : `Variabel harga (${hargaKey}) belum dibuat`;
-    test2Feedback = `Buatlah variabel harga dengan angka positif (tanpa tanda petik), contoh: ${hargaKey} = 15000.`;
-  } else if (isNaN(jumlahNum) || jumlahNum <= 0) {
+    test2Actual = `${hargaVarName} = ${hargaEntry.rawExpr} (Mengandung tanda titik koma ;)`;
+    test2Feedback = `Terdapat tanda titik koma (;) pada baris '${hargaVarName}'. Dalam Python, tanda titik koma (;) di akhir baris tidak diperlukan. Hapus tanda titik koma tersebut: '${hargaVarName} = ${hargaEntry.expr}'.`;
+  } else if (jumlahEntry?.hasTrailingSemicolon) {
     test2Passed = false;
-    test2Actual = staticJumlah ? `${jumlahKey} = ${staticJumlah}` : `Variabel kuantitas (${jumlahKey}) belum dibuat`;
-    test2Feedback = `Buatlah variabel jumlah berupa bilangan bulat positif, contoh: ${jumlahKey} = 2.`;
-  } else if (hasAddFormula) {
+    test2Actual = `${jumlahVarName} = ${jumlahEntry.rawExpr} (Mengandung tanda titik koma ;)`;
+    test2Feedback = `Terdapat tanda titik koma (;) pada baris '${jumlahVarName}'. Dalam Python, tanda titik koma (;) di akhir baris tidak diperlukan. Hapus tanda titik koma tersebut: '${jumlahVarName} = ${jumlahEntry.expr}'.`;
+  } else if (mulEntry && mulEntry.hasTrailingSemicolon) {
     test2Passed = false;
-    test2Actual = `${totalKey} = ${totalNum} (Menggunakan rumus penjumlahan +)`;
-    test2Feedback = `Total belanja dihitung dengan penjumlahan (${hargaNum} + ${jumlahNum} = ${totalNum}). Program kasir harus mengalikan harga dengan kuantitas (*): ${totalKey} = ${hargaKey} * ${jumlahKey}.`;
-  } else if (!hasMultiplyFormula && !isNaN(totalNum)) {
+    test2Actual = `${totalVarName} = ${mulEntry.rawExpr} (Mengandung tanda titik koma ;)`;
+    test2Feedback = `Rumus perkalianmu (${totalVarName} = ${mulEntry.expr}) sebenarnya sudah dinamis dan tepat! Namun dalam bahasa Python, kamu TIDAK perlu menuliskan tanda titik koma (;) di akhir baris. Silakan hapus tanda titik koma (;) pada baris tersebut: '${totalVarName} = ${mulEntry.expr}'.`;
+  } else if (!hargaVarName || isNaN(hargaNum) || hargaNum <= 0) {
     test2Passed = false;
-    test2Actual = `${totalKey} = ${totalNum} (Angka konstan tanpa formula perkalian)`;
-    test2Feedback = `Variabel ${totalKey} diisi angka tetap (${totalNum}). Gunakan formula perkalian dinamis: ${totalKey} = ${hargaKey} * ${jumlahKey} agar program otomatis berhitung jika harga berubah.`;
-  } else if (hasMultiplyFormula || (!isNaN(totalNum) && totalNum === hargaNum * jumlahNum)) {
+    test2Actual = hargaVarName
+      ? `${hargaVarName} = ${staticHarga}`
+      : 'Variabel harga belum dibuat';
+    test2Feedback =
+      'Buatlah variabel harga dengan angka positif tanpa tanda petik, contoh: harga_satuan = 15000 atau harga = 12000.';
+  } else if (!jumlahVarName || isNaN(jumlahNum) || jumlahNum <= 0) {
+    test2Passed = false;
+    test2Actual = jumlahVarName
+      ? `${jumlahVarName} = ${staticJumlah}`
+      : 'Variabel jumlah/kuantitas belum dibuat';
+    test2Feedback =
+      'Buatlah variabel jumlah/kuantitas berupa bilangan bulat positif tanpa petik (nama variabel bebas, misal: jumlah = 2, porsi = 2, atau qty = 2).';
+  } else if (hasAddFormula && totalVarName) {
+    test2Passed = false;
+    test2Actual = `${totalVarName} = ${totalNum} (Menggunakan penjumlahan +)`;
+    test2Feedback = `Total belanja dihitung dengan penjumlahan (${hargaNum} + ${jumlahNum}). Program kasir harus mengalikan dengan tanda bintang (*): ${totalVarName} = ${hargaVarName} * ${jumlahVarName}.`;
+  } else if (!hasMultiplyFormula && !isNaN(totalNum) && totalVarName) {
+    test2Passed = false;
+    test2Actual = `${totalVarName} = ${totalNum} (Angka konstan tanpa formula perkalian variabel)`;
+    test2Feedback = `Variabel '${totalVarName}' diisi angka tetap (${totalNum}). Gunakan formula perkalian dinamis memakai nama variabelmu: ${totalVarName} = ${hargaVarName} * ${jumlahVarName}.`;
+  } else if (hasMultiplyFormula && totalVarName) {
     const expectedCalc = hargaNum * jumlahNum;
     test2Passed = true;
-    test2Actual = `${hargaKey} = ${hargaNum}, ${jumlahKey} = ${jumlahNum}, ${totalKey} = ${expectedCalc} (Kalkulasi: ${hargaNum} * ${jumlahNum} = ${expectedCalc})`;
-    test2Feedback = `Perhitungan tepat! Variabel ${totalKey} terkalkulasi secara adaptif sebesar ${expectedCalc} dari formula ${hargaKey} * ${jumlahKey}.`;
+    test2Actual = `${hargaVarName} = ${hargaNum}, ${jumlahVarName} = ${jumlahNum}, ${totalVarName} = ${expectedCalc} (${hargaVarName} * ${jumlahVarName})`;
+    test2Feedback = `Perhitungan tepat! Variabel '${totalVarName}' terkalkulasi dinamis sebesar ${expectedCalc} dari formula ${hargaVarName} * ${jumlahVarName}.`;
   } else {
     test2Passed = false;
     test2Actual = 'Perhitungan total belum sesuai';
-    test2Feedback = `Pastikan baris formula perkalian dituliskan: ${totalKey} = ${hargaKey} * ${jumlahKey}.`;
+    test2Feedback = `Pastikan kamu mendefinisikan variabel total menggunakan perkalian dua variabelmu, contoh: total = ${hargaVarName} * ${jumlahVarName}.`;
   }
 
   testResults.push({
     id: 'test_calc',
-    title: `Uji 2: Perhitungan Variabel (${totalKey})`,
-    description: `Menghitung total harga belanja secara adaptif dari perkalian ${hargaKey} * ${jumlahKey}.`,
+    title: 'Uji 2: Perhitungan Total Belanja (Fleksibel)',
+    description:
+      'Menghitung total harga secara dinamis menggunakan perkalian variabel harga dan jumlah/kuantitas (nama variabel fleksibel).',
     isHidden: false,
     passed: test2Passed,
-    expectedDescription: `${totalKey} = ${hargaKey} * ${jumlahKey} (perkalian dinamis angka)`,
+    expectedDescription:
+      'total_variabel = variabel_harga * variabel_jumlah (perkalian dinamis angka positif)',
     actualOutput: test2Actual,
     feedback: test2Feedback,
   });
@@ -248,9 +382,10 @@ export function runCodeTests(
   const stdoutClean = stdout.trim();
   const totalStr = !isNaN(totalNum) ? String(totalNum) : '';
   const containsTotalVal = totalStr.length > 0 && stdoutClean.includes(totalStr);
-  const containsTotalWord = stdoutClean.toLowerCase().includes('total') || stdoutClean.toLowerCase().includes('rp');
+  const containsTotalWord = /total|struk|bayar|harga/i.test(stdoutClean);
 
-  const test3Passed = (execResult.status === 'success' || stdoutClean.length > 0) &&
+  const test3Passed =
+    (execResult.status === 'success' || stdoutClean.length > 0) &&
     hasPrintInCode &&
     (containsTotalVal || containsTotalWord);
 
@@ -260,70 +395,77 @@ export function runCodeTests(
     description: 'Menampilkan struk kasir dan total belanja menggunakan fungsi print().',
     isHidden: false,
     passed: test3Passed,
-    expectedDescription: 'Mencetak baris struk yang memuat total belanja',
+    expectedDescription: 'Mencetak baris struk yang memuat hasil total belanja',
     actualOutput: stdoutClean || '(Belum ada output terminal yang tercetak)',
     feedback: test3Passed
       ? 'Sempurna! Struk kasir berhasil tercetak ke terminal dengan rapi.'
-      : `Gunakan perintah print() untuk menampilkan struk, contoh: print("Total:", ${totalKey}).`,
+      : `Gunakan perintah print() untuk menampilkan total belanja, contoh: print("Total belanja:", ${totalVarName ?? 'total'}).`,
   });
 
   // =========================================================================
   // 4. TEST CASES TRANSPARAN (Generalisasi Komputasional)
   // =========================================================================
+  const hLabel = hargaVarName ?? 'harga';
+  const jLabel = jumlahVarName ?? 'jumlah';
+  const tLabel = totalVarName ?? 'total';
+
   const testCaseDetails: TestCaseDetail[] = [
     {
       title: 'Test Case 1 (Data Input Siswa)',
-      inputDesc: `${hargaKey} = ${!isNaN(hargaNum) ? hargaNum : '?'}, ${jumlahKey} = ${!isNaN(jumlahNum) ? jumlahNum : '?'}`,
-      expectedOutput: `${totalKey} = ${!isNaN(hargaNum) && !isNaN(jumlahNum) ? hargaNum * jumlahNum : '?'}`,
-      actualOutput: `${totalKey} = ${!isNaN(totalNum) ? totalNum : '?'}`,
+      inputDesc: `${hLabel} = ${!isNaN(hargaNum) ? hargaNum : '?'}, ${jLabel} = ${!isNaN(jumlahNum) ? jumlahNum : '?'}`,
+      expectedOutput: `${tLabel} = ${!isNaN(hargaNum) && !isNaN(jumlahNum) ? hargaNum * jumlahNum : '?'}`,
+      actualOutput: `${tLabel} = ${!isNaN(totalNum) ? totalNum : '?'}`,
       passed: test2Passed,
     },
     {
       title: 'Test Case 2 (Generalisasi Menu Lain)',
-      inputDesc: `${hargaKey} = 25000, ${jumlahKey} = 3`,
-      expectedOutput: `${totalKey} = 75000`,
-      actualOutput: hasMultiplyFormula ? `${totalKey} = 75000 (Otomatis terkalkulasi)` : 'Gagal (formula tidak dinamis)',
+      inputDesc: `${hLabel} = 25000, ${jLabel} = 3`,
+      expectedOutput: `${tLabel} = 75000`,
+      actualOutput: hasMultiplyFormula
+        ? `${tLabel} = 75000 (Otomatis terkalkulasi)`
+        : 'Gagal (formula tidak dinamis)',
       passed: hasMultiplyFormula,
     },
     {
       title: 'Test Case 3 (Generalisasi Pembelian Satuan)',
-      inputDesc: `${hargaKey} = 8000, ${jumlahKey} = 1`,
-      expectedOutput: `${totalKey} = 8000`,
-      actualOutput: hasMultiplyFormula ? `${totalKey} = 8000 (Otomatis terkalkulasi)` : 'Gagal (formula tidak dinamis)',
+      inputDesc: `${hLabel} = 8000, ${jLabel} = 1`,
+      expectedOutput: `${tLabel} = 8000`,
+      actualOutput: hasMultiplyFormula
+        ? `${tLabel} = 8000 (Otomatis terkalkulasi)`
+        : 'Gagal (formula tidak dinamis)',
       passed: hasMultiplyFormula,
     },
   ];
 
-  // 4. HIDDEN TEST 1 (Generalisasi Formula Terhadap Kasus Uji Eksternal)
-  const testHidden1Passed = hasMultiplyFormula;
+  const testHidden1Passed = hasMultiplyFormula && !mulEntry?.hasTrailingSemicolon;
   testResults.push({
     id: 'test_hidden_generalization',
     title: 'Uji Tersembunyi 1: Pola Formula Umum (Generalisasi)',
-    description: 'Menguji apakah logika program siswa bekerja otomatis untuk berbagai kombinasi harga dan jumlah.',
+    description:
+      'Menguji apakah logika program siswa bekerja otomatis untuk berbagai kombinasi harga dan jumlah menggunakan penamaan variabel siswa sendiri.',
     isHidden: true,
     passed: testHidden1Passed,
-    expectedDescription: `Menggunakan formula dinamis (${hargaKey} * ${jumlahKey})`,
+    expectedDescription: `Menggunakan formula dinamis (${hLabel} * ${jLabel})`,
     actualOutput: testHidden1Passed
       ? 'Lolos semua Test Case: Kasus 1, Kasus 2 (Rp 25.000 x 3 = Rp 75.000), Kasus 3 (Rp 8.000 x 1 = Rp 8.000)'
-      : 'Formula belum dinamis (tidak dapat memproses perubahan harga/kuantitas)',
+      : 'Formula belum dinamis (tidak dapat memproses perubahan harga/jumlah)',
     feedback: testHidden1Passed
-      ? 'Logika generalisasi terpenuhi! Program kasirmu dapat digunakan untuk transaksi belanja barang apa pun.'
-      : `Pastikan rumus total ditulis menggunakan variabel: ${totalKey} = ${hargaKey} * ${jumlahKey} (jangan menuliskan angka langsung).`,
+      ? `Logika generalisasi terpenuhi! Formula '${tLabel} = ${hLabel} * ${jLabel}' bekerja untuk nilai apa pun.`
+      : `Pastikan rumus total ditulis menggunakan variabelmu sendiri: ${tLabel} = ${hLabel} * ${jLabel} (jangan menulis angka langsung).`,
     testCaseDetails,
   });
 
-  // 5. HIDDEN TEST 2 (Integritas Tipe Data Numerik)
   const isTypeValid = !isHargaQuoted && !isJumlahQuoted && !isNaN(hargaNum) && !isNaN(jumlahNum);
   testResults.push({
     id: 'test_hidden_types',
     title: 'Uji Tersembunyi 2: Integritas Tipe Data Aritmatika',
-    description: 'Memastikan variabel harga dan kuantitas bertipe numerik murni tanpa tanda petik.',
+    description: 'Memastikan variabel harga dan jumlah/kuantitas bertipe numerik murni tanpa tanda petik.',
     isHidden: true,
     passed: isTypeValid,
-    expectedDescription: `${hargaKey} dan ${jumlahKey} berupa angka tanpa petik`,
+    expectedDescription: `${hLabel} dan ${jLabel} berupa angka tanpa petik`,
     actualOutput: isTypeValid
-      ? `Tipe data terkonfirmasi numerik murni (harga: ${hargaNum}, jumlah: ${jumlahNum})`
-      : 'Tipe data terdeteksi teks String (menggunakan tanda petik)',
+      ? `Tipe data terkonfirmasi numerik murni (${hLabel}: ${hargaNum}, ${jLabel}: ${jumlahNum})`
+      : 'Tipe data terdeteksi teks String atau belum berupa angka valid',
     feedback: isTypeValid
       ? 'Tipe data numerik murni terverifikasi untuk seluruh kalkulasi kasir.'
       : 'Jangan membungkus angka harga atau jumlah dengan tanda petik agar operasi matematika dapat berjalan.',

@@ -60,9 +60,9 @@ const STAGE_GUIDE_ITEMS = [
     badge: 'Tahap 5',
     title: STAGE_LABELS.lab,
     summary:
-      'Siswa melengkapi kode Python di editor browser (Pyodide) dan menguji program dengan test case otomatis.',
+      'Siswa melengkapi kode Python di editor browser (Pyodide) dan menguji program dengan test case adaptif.',
     rubric:
-      'Skor awal 100. Penggunaan bantuan (Hint Ladder Level 1–3) mengurangi skor (-10 / -25 / -50, skor minimum 50) yang langsung terekam ke Dasbor Guru.',
+      'Guru berperan sebagai fasilitator kelas (tanpa tombol bantuan otomatis / pengurangan poin). Sistem memvalidasi kode secara adaptif terhadap variasi penamaan variabel siswa.',
   },
 ];
 

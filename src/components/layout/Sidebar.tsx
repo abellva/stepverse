@@ -2,17 +2,24 @@ import { NavLink } from 'react-router';
 import { MATERI_LIST } from '../../data/curriculum';
 import { useAppStore } from '../../store/useAppStore';
 import { ProgressBar } from '../ui/ProgressBar';
+import { checkPosttestAccess } from '../../utils/stuckDetector';
 
 // ─── Sidebar Siswa ───────────────────────────────────────────────
 function SidebarSiswa() {
-  const { progress, answers, user } = useAppStore();
+  const { user, progress, answers, posttestLockedByGuru, demoMode } = useAppStore();
   const isPretestDone = !!answers['pretest_result'] || !!answers['pretest_score'];
   const isPosttestDone = !!answers['posttest_result'] || !!answers['posttest_score'];
+
+  const posttestAccess = checkPosttestAccess({
+    progress,
+    lockedByGuru: posttestLockedByGuru,
+    demoMode,
+  });
 
   return (
     <>
       <h2 className="text-xs font-bold uppercase tracking-widest text-[#464555] px-2 mb-2">
-        Daftar Materi
+        Latihan Formatif
       </h2>
 
       {MATERI_LIST.map((m) => {
@@ -56,10 +63,20 @@ function SidebarSiswa() {
         );
       })}
 
-      {/* Navigasi evaluasi & beranda siswa */}
+      <div className="pt-2">
+        <SidebarLink
+          to="/diskusi"
+          icon="💬"
+          label="Diskusi Kelompok"
+          badge={user?.kelompok || 'Kelompok 1'}
+          badgeVariant="active"
+        />
+      </div>
+
+      {/* Navigasi evaluasi sumatif & beranda siswa */}
       <div className="mt-auto pt-4 border-t border-[#c0d8ef]/60 flex flex-col gap-1.5">
         <h2 className="text-xs font-bold uppercase tracking-widest text-[#464555] px-2 mb-1">
-          Evaluasi CT
+          Evaluasi Sumatif
         </h2>
         <SidebarLink
           to="/tes/awal"
@@ -70,20 +87,19 @@ function SidebarSiswa() {
         />
         <SidebarLink
           to="/tes/akhir"
-          icon="🏆"
-          label="Posttest CT"
-          badge={isPosttestDone ? '✅ Selesai' : progress['1-lab'] === 'done' ? 'Mulai' : undefined}
+          icon={isPosttestDone || posttestAccess.unlocked ? '🏆' : '🔒'}
+          label="Post-test CT"
+          badge={
+            isPosttestDone
+              ? '✅ Terekam'
+              : posttestAccess.unlocked
+              ? 'Terbuka'
+              : '🔒 Terkunci'
+          }
           badgeVariant={isPosttestDone ? 'done' : 'active'}
         />
-        <div className="pt-2 flex flex-col gap-1">
+        <div className="pt-2">
           <SidebarLink to="/beranda" icon="🏠" label="Beranda Materi" />
-          <SidebarLink
-            to="/pilih-kelompok"
-            icon="👥"
-            label="Kelompok Belajar"
-            badge={user?.kelompok ? `Kel. ${user.kelompok}` : 'Pilih'}
-            badgeVariant={user?.kelompok ? 'done' : 'active'}
-          />
         </div>
       </div>
     </>
@@ -98,12 +114,11 @@ function SidebarGuru() {
         Menu Guru
       </h2>
 
-      <SidebarLink to="/guru"           icon="📊" label="Dashboard"            end />
+      <SidebarLink to="/guru"           icon="📊" label="Monitoring Real-Time" end />
       <SidebarLink to="/guru/kelas"     icon="👥" label="Daftar Siswa"         />
-      <SidebarLink to="/guru/kelompok"  icon="💬" label="Diskusi Kelompok"     />
       <SidebarLink to="/guru/kemajuan"  icon="📈" label="Kemajuan Belajar"     />
       <SidebarLink to="/guru/ct"        icon="🧠" label="Indikator CT"         />
-      <SidebarLink to="/guru/ekspor"    icon="📥" label="Ekspor Data CSV"      />
+      <SidebarLink to="/guru/ekspor"    icon="📥" label="Ekspor Data & Log"    />
 
       {/* Referensi materi read-only (guru tidak mengerjakan halaman siswa) */}
       <div className="mt-auto pt-4 border-t border-[#c0d8ef]/60 flex flex-col gap-1">
@@ -122,7 +137,7 @@ function SidebarGuru() {
   );
 }
 
-// ─── Helper NavLink dengan styling LoginPage ───────────────────────
+// ─── Helper NavLink ──────────────────────────────────────────────
 function SidebarLink({
   to,
   icon,

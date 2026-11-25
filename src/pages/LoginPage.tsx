@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router';
 import { useAppStore } from '../store/useAppStore';
-import { authenticate, KELAS_OPTIONS, SEKOLAH_OPTIONS } from '../data/users';
-import { getUserGroup } from '../services/groupService';
+import { authenticate, KELAS_OPTIONS, KELOMPOK_OPTIONS, SEKOLAH_OPTIONS } from '../data/users';
 
 type Peran = 'siswa' | 'guru';
 
@@ -21,10 +20,12 @@ export default function LoginPage() {
   const [nisn, setNisn]         = useState('');
   const [password, setPassword] = useState('');
   const [kelas, setKelas]       = useState(KELAS_OPTIONS[0]);
+  const [kelompok, setKelompok] = useState(KELOMPOK_OPTIONS[0]);
   const [sekolah, _setSekolah]  = useState(SEKOLAH_OPTIONS[0]);
   const [showPass, setShowPass] = useState(false);
   const [ingat, setIngat]       = useState(false);
   const [error, setError]       = useState('');
+  const [infoNotice, setInfoNotice] = useState('');
   const [loading, setLoading]   = useState(false);
 
   useEffect(() => {
@@ -69,22 +70,14 @@ export default function LoginPage() {
       localStorage.removeItem('stepverse-remembered');
     }
 
-    const storedGroup = user.peran === 'siswa' ? getUserGroup(user.id) : undefined;
     setUser({
       id: user.id,
       nama: user.nama,
       peran: user.peran,
       kelas: user.kelas,
-      kelompok: storedGroup?.id,
+      kelompok: user.peran === 'siswa' ? (kelompok || user.kelompok || KELOMPOK_OPTIONS[0]) : undefined,
     });
-
-    if (user.peran === 'guru') {
-      navigate('/guru');
-    } else if (storedGroup) {
-      navigate('/beranda');
-    } else {
-      navigate('/pilih-kelompok');
-    }
+    navigate(user.peran === 'guru' ? '/guru' : '/beranda');
   }
 
   return (
@@ -221,7 +214,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 className="text-xs text-[#3d6b91] font-semibold hover:underline focus-visible:ring-1 focus-visible:ring-[#68b6f7] outline-none rounded"
-                onClick={() => alert('Hubungi guru untuk reset kata sandi.')}
+                onClick={() => setInfoNotice('Hubungi guru pembimbing kelasmu untuk reset kata sandi.')}
               >
                 Lupa Sandi?
               </button>
@@ -253,33 +246,63 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Kelas dropdown — hanya siswa */}
+          {/* Kelas & Kelompok dropdown — hanya siswa */}
           {peran === 'siswa' && (
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="kelas" className="text-sm font-bold text-[#121c2c] flex items-center gap-1.5">
-                Pilih Kelas &amp; Sekolah
-              </label>
-              <div className="relative">
-                <select
-                  id="kelas"
-                  value={kelas}
-                  onChange={(e) => setKelas(e.target.value)}
-                  className="w-full appearance-none px-6 py-3 rounded-full text-sm text-[#121c2c] outline-none focus-visible:ring-2 focus-visible:ring-[#68b6f7] transition pr-10 cursor-pointer"
-                  style={{
-                    background: '#eaf6ff',
-                    boxShadow:
-                      'inset 3px 3px 6px rgba(61,107,145,0.2), inset -3px -3px 6px rgba(255,255,255,0.8), 0 14px 14px -10px rgba(61,107,145,0.25)',
-                  }}
-                >
-                  {KELAS_OPTIONS.map((k) => (
-                    <option key={k}>{k} • {sekolah}</option>
-                  ))}
-                </select>
-                <img
-                  src={imgArrow}
-                  alt=""
-                  className="absolute right-5 top-1/2 -translate-y-1/2 w-3 h-2 pointer-events-none"
-                />
+            <div className="grid sm:grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="kelas" className="text-sm font-bold text-[#121c2c] flex items-center gap-1.5">
+                  Kelas &amp; Sekolah
+                </label>
+                <div className="relative">
+                  <select
+                    id="kelas"
+                    value={kelas}
+                    onChange={(e) => setKelas(e.target.value)}
+                    className="w-full appearance-none px-5 py-3 rounded-full text-sm text-[#121c2c] outline-none focus-visible:ring-2 focus-visible:ring-[#68b6f7] transition pr-10 cursor-pointer"
+                    style={{
+                      background: '#eaf6ff',
+                      boxShadow:
+                        'inset 3px 3px 6px rgba(61,107,145,0.2), inset -3px -3px 6px rgba(255,255,255,0.8), 0 14px 14px -10px rgba(61,107,145,0.25)',
+                    }}
+                  >
+                    {KELAS_OPTIONS.map((k) => (
+                      <option key={k} value={k}>{k} • {sekolah}</option>
+                    ))}
+                  </select>
+                  <img
+                    src={imgArrow}
+                    alt=""
+                    className="absolute right-4 top-1/2 -translate-y-1/2 w-3 h-2 pointer-events-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="kelompok" className="text-sm font-bold text-[#121c2c] flex items-center gap-1.5">
+                  Kelompok Belajar
+                </label>
+                <div className="relative">
+                  <select
+                    id="kelompok"
+                    value={kelompok}
+                    onChange={(e) => setKelompok(e.target.value)}
+                    className="w-full appearance-none px-5 py-3 rounded-full text-sm text-[#121c2c] outline-none focus-visible:ring-2 focus-visible:ring-[#68b6f7] transition pr-10 cursor-pointer"
+                    style={{
+                      background: '#eaf6ff',
+                      boxShadow:
+                        'inset 3px 3px 6px rgba(61,107,145,0.2), inset -3px -3px 6px rgba(255,255,255,0.8), 0 14px 14px -10px rgba(61,107,145,0.25)',
+                    }}
+                  >
+                    {KELOMPOK_OPTIONS.map((g) => (
+                      <option key={g} value={g}>{g}</option>
+                    ))}
+                  </select>
+                  <img
+                    src={imgArrow}
+                    alt=""
+                    className="absolute right-4 top-1/2 -translate-y-1/2 w-3 h-2 pointer-events-none"
+                  />
+                </div>
               </div>
             </div>
           )}
@@ -311,6 +334,13 @@ export default function LoginPage() {
               </span>
             </label>
           </div>
+
+          {/* Info Notice */}
+          {infoNotice && (
+            <div className="text-xs text-[#253f8a] bg-[#eaf6ff] border border-[#a6d7ff] rounded-2xl px-4 py-2.5 text-center">
+              {infoNotice}
+            </div>
+          )}
 
           {/* Error */}
           {error && (

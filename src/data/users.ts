@@ -9,7 +9,16 @@ export interface UserRecord {
   peran: 'siswa' | 'guru';
   kelas: string;
   sekolah: string;
+  kelompok?: string;
 }
+ 
+export const KELOMPOK_OPTIONS = [
+  'Kelompok 1',
+  'Kelompok 2',
+  'Kelompok 3',
+  'Kelompok 4',
+  'Kelompok 5',
+];
 
 // Akun bawaan (pre-seeded)
 const DEFAULT_USERS: UserRecord[] = [
@@ -21,6 +30,7 @@ const DEFAULT_USERS: UserRecord[] = [
     peran: 'siswa',
     kelas: 'X MIPA 1',
     sekolah: 'SMAN 1 Nusantara',
+    kelompok: 'Kelompok 1',
   },
   {
     id: 'siswa-002',
@@ -30,6 +40,7 @@ const DEFAULT_USERS: UserRecord[] = [
     peran: 'siswa',
     kelas: 'X MIPA 1',
     sekolah: 'SMAN 1 Nusantara',
+    kelompok: 'Kelompok 2',
   },
   {
     id: 'guru-001',
@@ -84,6 +95,7 @@ export function registerUser(data: {
   peran: 'siswa' | 'guru';
   kelas: string;
   sekolah: string;
+  kelompok?: string;
 }): string | null {
   const users = loadUsers();
   if (users.find((u) => u.nisn.trim() === data.nisn.trim())) {

@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router';
-import { MATERI_LIST, STAGE_LABELS } from '../data/curriculum';
+import { MATERI_LIST } from '../data/curriculum';
 import { KinestheticSimulator } from '../components/KinestheticSimulator';
 
 export default function SimulasiPage() {
@@ -14,7 +14,7 @@ export default function SimulasiPage() {
     <div className="max-w-2xl mx-auto flex flex-col gap-6">
       <div>
         <div className="text-xs text-[#464555] mb-1 uppercase tracking-widest font-semibold">
-          Materi {materiId} · {STAGE_LABELS.simulasi}
+          Materi {materiId} · Simulasi Kinestetik
         </div>
         <h1 className="text-2xl font-bold text-[#121c2c]">{materi.judul}</h1>
         <p className="text-sm text-[#464555] mt-1 leading-relaxed">

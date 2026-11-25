@@ -13,6 +13,105 @@ import {
 } from '../utils/parsonsValidator';
 import { logEvent } from '../services/logger';
 
+export interface ParsonsReasonEvaluation {
+  status: 'bener' | 'mendekati' | 'salah';
+  badgeLabel: string;
+  badgeClass: string;
+  feedback: string;
+}
+
+export function evaluateParsonsBlockReason(
+  blockId: string,
+  lineNo: number,
+  reasonText: string
+): ParsonsReasonEvaluation {
+  const clean = reasonText.trim().toLowerCase();
+
+  if (clean.length < 5 || clean.includes('gatau') || clean.includes('asal') || clean.includes('tebak')) {
+    return {
+      status: 'salah',
+      badgeLabel: '❌ Alasan Belum Jelas',
+      badgeClass: 'bg-red-950 text-red-200 border-red-500',
+      feedback: 'Alasanmu belum menjelaskan fungsi logis penempatan baris kode ini. Tuliskan alasan mengapa baris ini dibutuhkan pada urutan tersebut.',
+    };
+  }
+
+  const isInputBlock = blockId.includes('nama') || blockId.includes('harga') || blockId.includes('jumlah');
+  const isTotalBlock = blockId.includes('total');
+  const isPrintBlock = blockId.includes('print');
+  const isDistractor = blockId.includes('_d');
+
+  if (isDistractor) {
+    return {
+      status: 'salah',
+      badgeLabel: '❌ Baris Pengecoh',
+      badgeClass: 'bg-red-950 text-red-200 border-red-500',
+      feedback: 'Baris kode ini adalah pengecoh dan tidak boleh dimasukkan ke dalam susunan program kasir.',
+    };
+  }
+
+  if (isInputBlock) {
+    const mentionsInput = /variabel|input|definisi|nilai|awal|data|simpan|sebelum|nama|harga|jumlah/i.test(clean);
+    if (mentionsInput) {
+      return {
+        status: 'bener',
+        badgeLabel: '✅ Tepat & Logis (Bener)',
+        badgeClass: 'bg-emerald-950 text-emerald-200 border-emerald-500',
+        feedback: 'Sangat logis! Variabel masukan harus didefinisikan di awal sebelum digunakan dalam perhitungan.',
+      };
+    }
+    return {
+      status: 'mendekati',
+      badgeLabel: '⚠️ Alasan Mendekati',
+      badgeClass: 'bg-amber-950 text-amber-200 border-amber-500',
+      feedback: 'Penempatan baris sesuai. Ingat bahwa baris ini berfungsi menginisialisasi variabel masukan agar tersimpan di memori.',
+    };
+  }
+
+  if (isTotalBlock) {
+    const mentionsProcess = /hitung|proses|kali|perkalian|formula|rumus|total|setelah/i.test(clean);
+    if (mentionsProcess) {
+      return {
+        status: 'bener',
+        badgeLabel: '✅ Tepat & Logis (Bener)',
+        badgeClass: 'bg-emerald-950 text-emerald-200 border-emerald-500',
+        feedback: 'Tepat sekali! Formula total belanja mengeksekusi perkalian setelah variabel harga dan jumlah tersedia.',
+      };
+    }
+    return {
+      status: 'mendekati',
+      badgeLabel: '⚠️ Alasan Mendekati',
+      badgeClass: 'bg-amber-950 text-amber-200 border-amber-500',
+      feedback: 'Penempatan baris perkalian total sudah tepat. Ingat bahwa rumus ini memerlukan nilai harga dan jumlah yang sudah ada sebelumnya.',
+    };
+  }
+
+  if (isPrintBlock) {
+    const mentionsOutput = /cetak|tampil|print|output|keluar|struk|nota|hasil|akhir/i.test(clean);
+    if (mentionsOutput) {
+      return {
+        status: 'bener',
+        badgeLabel: '✅ Tepat & Logis (Bener)',
+        badgeClass: 'bg-emerald-950 text-emerald-200 border-emerald-500',
+        feedback: 'Logika eksekusi tepat! Perintah print() menyajikan struk keluaran setelah hasil perhitungan selesai diperoleh.',
+      };
+    }
+    return {
+      status: 'mendekati',
+      badgeLabel: '⚠️ Alasan Mendekati',
+      badgeClass: 'bg-amber-950 text-amber-200 border-amber-500',
+      feedback: 'Penempatan baris cetak print() sudah tepat. Perintah cetak dijalankan di akhir untuk menampilkan struk kepada pembeli.',
+    };
+  }
+
+  return {
+    status: 'bener',
+    badgeLabel: '✅ Alasan Diterima',
+    badgeClass: 'bg-emerald-950 text-emerald-200 border-emerald-500',
+    feedback: 'Alasan penempatan baris kode telah diterima.',
+  };
+}
+
 function shuffle<T>(arr: T[]): T[] {
   return [...arr].sort(() => Math.random() - 0.5);
 }
@@ -23,7 +122,7 @@ export default function ParsonsPage() {
   const materiId = Number(id);
   const materi = MATERI_LIST.find((m) => m.id === materiId);
 
-  const { setProgress, setAnswer, demoMode, progress } = useAppStore();
+  const { setProgress, setAnswer, demoMode, progress, enterStage, recordStageFailure } = useAppStore();
   const [level, setLevel] = useState<1 | 2 | 3>(1);
   const [maxLevelUnlocked, setMaxLevelUnlocked] = useState<1 | 2 | 3>(() => {
     if (progress[`${materiId}-parsons`] === 'done') return 3;
@@ -33,16 +132,34 @@ export default function ParsonsPage() {
   // LEVEL 1 STATE
   const [l1Pool, setL1Pool] = useState<ParsonsBlockL1[]>(() => shuffle(PARSONS_L1_BLOCKS));
   const [l1Placed, setL1Placed] = useState<ParsonsBlockL1[]>([]);
+  const [l1Reasons, setL1Reasons] = useState<Record<string, string>>({});
+  const [l1Evaluations, setL1Evaluations] = useState<Record<string, ParsonsReasonEvaluation>>({});
   const [l1Errors, setL1Errors] = useState<string[]>([]);
   const [l1Success, setL1Success] = useState(false);
 
   // LEVEL 2 STATE
   const [l2Pool, setL2Pool] = useState<ParsonsBlockL2[]>(() => shuffle(PARSONS_L2_BLOCKS));
   const [l2Placed, setL2Placed] = useState<(ParsonsBlockL2 & { userBlanks: string[] })[]>([]);
+  const [l2Reasons, setL2Reasons] = useState<Record<string, string>>({});
+  const [l2Evaluations, setL2Evaluations] = useState<Record<string, ParsonsReasonEvaluation>>({});
   const [l2Errors, setL2Errors] = useState<string[]>([]);
   const [l2Success, setL2Success] = useState(false);
 
+  // MODAL ALASAN PENEMPATAN BARIS KODE
+  const [pendingBlock, setPendingBlock] = useState<{
+    level: 1 | 2;
+    blockL1?: ParsonsBlockL1;
+    blockL2?: ParsonsBlockL2;
+    isEditing?: boolean;
+    lineNo?: number;
+  } | null>(null);
+  const [blockReasonInput, setBlockReasonInput] = useState('');
+
   const canProceed = progress[`${materiId}-parsons`] === 'done' || level === 3 || l2Success;
+
+  useEffect(() => {
+    enterStage('parsons');
+  }, [enterStage]);
 
   useEffect(() => {
     if (progress[`${materiId}-parsons`] === 'done') {
@@ -53,15 +170,39 @@ export default function ParsonsPage() {
   if (!materi) return <div className="p-6 text-red-500">Materi tidak ditemukan.</div>;
 
   // L1 HANDLERS
-  function handlePlaceL1(block: ParsonsBlockL1) {
-    setL1Pool((p) => p.filter((b) => b.id !== block.id));
-    setL1Placed((p) => [...p, block]);
-    setL1Errors([]);
+  function promptPlaceL1(block: ParsonsBlockL1) {
+    setPendingBlock({
+      level: 1,
+      blockL1: block,
+      isEditing: false,
+      lineNo: l1Placed.length + 1,
+    });
+    setBlockReasonInput(l1Reasons[block.id] || '');
+  }
+
+  function promptEditL1Reason(block: ParsonsBlockL1, lineNo: number) {
+    setPendingBlock({
+      level: 1,
+      blockL1: block,
+      isEditing: true,
+      lineNo,
+    });
+    setBlockReasonInput(l1Reasons[block.id] || '');
   }
 
   function handleRemoveL1(block: ParsonsBlockL1) {
     setL1Placed((p) => p.filter((b) => b.id !== block.id));
     setL1Pool((p) => [...p, block]);
+    setL1Reasons((prev) => {
+      const copy = { ...prev };
+      delete copy[block.id];
+      return copy;
+    });
+    setL1Evaluations((prev) => {
+      const copy = { ...prev };
+      delete copy[block.id];
+      return copy;
+    });
     setL1Errors([]);
   }
 
@@ -76,6 +217,20 @@ export default function ParsonsPage() {
   }
 
   function checkL1() {
+    const missingReasons = l1Placed.some((b) => !(l1Reasons[b.id] ?? '').trim());
+    if (missingReasons) {
+      setL1Errors(['Setiap baris kode yang kamu tempatkan wajib dilengkapi alasan logis penempatannya.']);
+      return;
+    }
+
+    const faultyReasons = l1Placed.filter((b) => l1Evaluations[b.id]?.status === 'salah');
+    if (faultyReasons.length > 0) {
+      setL1Errors([
+        'Ada alasan penempatan baris yang belum memadai atau belum tepat. Periksa baris bertanda ❌ dan klik "Ubah Alasan" untuk memperjelas.',
+      ]);
+      return;
+    }
+
     const result = validateParsonsL1(l1Placed.map((b) => b.id));
     setL1Errors(result.errors);
     setL1Success(result.isValid);
@@ -85,10 +240,12 @@ export default function ParsonsPage() {
       componentId: 'parsons-l1',
       ctComponent: 'algorithm_design',
       result: result.isValid ? 'pass' : 'fail',
-      payload: { placed: l1Placed.map((b) => b.id) },
+      payload: { placed: l1Placed.map((b) => b.id), reasons: l1Reasons, evaluations: l1Evaluations },
     });
 
-    if (result.isValid) {
+    if (!result.isValid) {
+      recordStageFailure('parsons');
+    } else {
       setMaxLevelUnlocked((prev) => Math.max(prev, 2) as 1 | 2 | 3);
       setTimeout(() => {
         setLevel(2);
@@ -97,12 +254,24 @@ export default function ParsonsPage() {
   }
 
   // L2 HANDLERS
-  function handlePlaceL2(block: ParsonsBlockL2) {
-    const blankMatches = block.template.match(/\{(\d+)\}/g);
-    const blankCount = blankMatches ? blankMatches.length : 1;
-    setL2Pool((p) => p.filter((b) => b.id !== block.id));
-    setL2Placed((p) => [...p, { ...block, userBlanks: Array(blankCount).fill('') }]);
-    setL2Errors([]);
+  function promptPlaceL2(block: ParsonsBlockL2) {
+    setPendingBlock({
+      level: 2,
+      blockL2: block,
+      isEditing: false,
+      lineNo: l2Placed.length + 1,
+    });
+    setBlockReasonInput(l2Reasons[block.id] || '');
+  }
+
+  function promptEditL2Reason(block: ParsonsBlockL2, lineNo: number) {
+    setPendingBlock({
+      level: 2,
+      blockL2: block,
+      isEditing: true,
+      lineNo,
+    });
+    setBlockReasonInput(l2Reasons[block.id] || '');
   }
 
   function handleRemoveL2(id: string) {
@@ -110,6 +279,16 @@ export default function ParsonsPage() {
     if (!found) return;
     setL2Placed((p) => p.filter((b) => b.id !== id));
     setL2Pool((p) => [...p, PARSONS_L2_BLOCKS.find((b) => b.id === id)!]);
+    setL2Reasons((prev) => {
+      const copy = { ...prev };
+      delete copy[id];
+      return copy;
+    });
+    setL2Evaluations((prev) => {
+      const copy = { ...prev };
+      delete copy[id];
+      return copy;
+    });
     setL2Errors([]);
   }
 
@@ -135,6 +314,20 @@ export default function ParsonsPage() {
   }
 
   function checkL2() {
+    const missingReasons = l2Placed.some((b) => !(l2Reasons[b.id] ?? '').trim());
+    if (missingReasons) {
+      setL2Errors(['Setiap baris kode di Level 2 wajib dilengkapi alasan logis penempatannya.']);
+      return;
+    }
+
+    const faultyReasons = l2Placed.filter((b) => l2Evaluations[b.id]?.status === 'salah');
+    if (faultyReasons.length > 0) {
+      setL2Errors([
+        'Ada alasan penempatan baris di Level 2 yang belum memadai atau belum tepat. Periksa baris bertanda ❌ dan klik "Ubah Alasan" untuk memperjelas.',
+      ]);
+      return;
+    }
+
     const payload = l2Placed.map((p) => ({
       id: p.id,
       filledBlanks: p.userBlanks,
@@ -148,10 +341,12 @@ export default function ParsonsPage() {
       componentId: 'parsons-l2',
       ctComponent: 'algorithm_design',
       result: result.isValid ? 'pass' : 'fail',
-      payload,
+      payload: { placed: payload, reasons: l2Reasons, evaluations: l2Evaluations },
     });
 
-    if (result.isValid) {
+    if (!result.isValid) {
+      recordStageFailure('parsons');
+    } else {
       setMaxLevelUnlocked(3);
       setAnswer(`${materiId}-parsons-score`, 100);
       setProgress(materiId, 'parsons', 'done');
@@ -160,6 +355,37 @@ export default function ParsonsPage() {
         setLevel(3);
       }, 1200);
     }
+  }
+
+  function handleConfirmPlaceBlock() {
+    if (!pendingBlock || blockReasonInput.trim().length < 4) return;
+    const rText = blockReasonInput.trim();
+    if (pendingBlock.level === 1 && pendingBlock.blockL1) {
+      const block = pendingBlock.blockL1;
+      const lineNo = pendingBlock.lineNo ?? (l1Placed.length + 1);
+      const ev = evaluateParsonsBlockReason(block.id, lineNo, rText);
+      setL1Reasons((prev) => ({ ...prev, [block.id]: rText }));
+      setL1Evaluations((prev) => ({ ...prev, [block.id]: ev }));
+      if (!pendingBlock.isEditing) {
+        setL1Pool((p) => p.filter((b) => b.id !== block.id));
+        setL1Placed((p) => [...p, block]);
+      }
+      setL1Errors([]);
+    } else if (pendingBlock.level === 2 && pendingBlock.blockL2) {
+      const block = pendingBlock.blockL2;
+      const lineNo = pendingBlock.lineNo ?? (l2Placed.length + 1);
+      const ev = evaluateParsonsBlockReason(block.id, lineNo, rText);
+      setL2Reasons((prev) => ({ ...prev, [block.id]: rText }));
+      setL2Evaluations((prev) => ({ ...prev, [block.id]: ev }));
+      if (!pendingBlock.isEditing) {
+        const blankMatches = block.template.match(/\{(\d+)\}/g);
+        const blankCount = blankMatches ? blankMatches.length : 1;
+        setL2Pool((p) => p.filter((b) => b.id !== block.id));
+        setL2Placed((p) => [...p, { ...block, userBlanks: Array(blankCount).fill('') }]);
+      }
+      setL2Errors([]);
+    }
+    setPendingBlock(null);
   }
 
   function handleGoToLab() {
@@ -255,7 +481,7 @@ export default function ParsonsPage() {
                   <button
                     key={b.id}
                     type="button"
-                    onClick={() => handlePlaceL1(b)}
+                    onClick={() => promptPlaceL1(b)}
                     className="font-mono text-xs px-3 py-2 rounded-xl bg-white border border-[#a6d7ff] text-[#253f8a] hover:bg-[#eaf6ff] transition shadow-sm active:scale-95"
                   >
                     + {b.code}
@@ -276,39 +502,65 @@ export default function ParsonsPage() {
                 {l1Placed.map((b, idx) => (
                   <div
                     key={b.id}
-                    className="flex items-center justify-between px-3 py-2 rounded-xl bg-[#0f172a] border border-[#334155] text-white"
+                    className="flex flex-col gap-1.5 px-3 py-2 rounded-xl bg-[#0f172a] border border-[#334155] text-white"
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="font-mono text-xs text-[#64748b] select-none">
-                        {idx + 1}.
-                      </span>
-                      <code className="font-mono text-xs text-[#38bdf8]">{b.code}</code>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="font-mono text-xs text-[#64748b] select-none">
+                          {idx + 1}.
+                        </span>
+                        <code className="font-mono text-xs text-[#38bdf8]">{b.code}</code>
+                      </div>
+
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => moveL1(idx, -1)}
+                          disabled={idx === 0}
+                          className="px-2 py-0.5 rounded text-xs bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-30"
+                        >
+                          ▲
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => moveL1(idx, 1)}
+                          disabled={idx === l1Placed.length - 1}
+                          className="px-2 py-0.5 rounded text-xs bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-30"
+                        >
+                          ▼
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveL1(b)}
+                          className="text-red-400 hover:text-red-300 text-xs px-2 py-0.5 ml-1"
+                        >
+                          ✕
+                        </button>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => moveL1(idx, -1)}
-                        disabled={idx === 0}
-                        className="px-2 py-0.5 rounded text-xs bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-30"
-                      >
-                        ▲
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => moveL1(idx, 1)}
-                        disabled={idx === l1Placed.length - 1}
-                        className="px-2 py-0.5 rounded text-xs bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-30"
-                      >
-                        ▼
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveL1(b)}
-                        className="text-red-400 hover:text-red-300 text-xs px-2 py-0.5 ml-1"
-                      >
-                        ✕
-                      </button>
+                    {/* Kolom Alasan Logis Tiap Baris L1 */}
+                    <div className="flex flex-col gap-1 bg-[#1e293b] p-2 rounded-lg border border-slate-700">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="text-slate-300 font-sans">
+                          💡 <strong>Alasan:</strong> {l1Reasons[b.id] || '(Belum ada alasan)'}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => promptEditL1Reason(b, idx + 1)}
+                          className="text-[#38bdf8] hover:underline text-[10px] ml-2 shrink-0 font-sans font-semibold"
+                        >
+                          ✎ Ubah Alasan
+                        </button>
+                      </div>
+                      {l1Evaluations[b.id] && (
+                        <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-700/60 text-[10px]">
+                          <span className="text-slate-400 font-sans">{l1Evaluations[b.id].feedback}</span>
+                          <span className={`px-2 py-0.5 rounded-full font-bold border shrink-0 ${l1Evaluations[b.id].badgeClass}`}>
+                            {l1Evaluations[b.id].badgeLabel}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -388,7 +640,7 @@ export default function ParsonsPage() {
                   <button
                     key={b.id}
                     type="button"
-                    onClick={() => handlePlaceL2(b)}
+                    onClick={() => promptPlaceL2(b)}
                     className="font-mono text-xs px-3 py-2 rounded-xl bg-white border border-[#a6d7ff] text-[#253f8a] hover:bg-[#eaf6ff] transition shadow-sm active:scale-95"
                   >
                     + {b.template.replace(/\{(\d+)\}/g, '____')}
@@ -409,54 +661,80 @@ export default function ParsonsPage() {
                 {l2Placed.map((b, idx) => (
                   <div
                     key={b.id}
-                    className="flex flex-wrap items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-[#0f172a] border border-[#334155] text-white"
+                    className="flex flex-col gap-1.5 px-3 py-2.5 rounded-xl bg-[#0f172a] border border-[#334155] text-white"
                   >
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-mono text-xs text-[#64748b] select-none">{idx + 1}.</span>
-                      <span className="font-mono text-xs text-[#38bdf8]">
-                        {b.template.split(/\{(\d+)\}/).map((part, pIdx) => {
-                          const blankNum = parseInt(part, 10);
-                          if (!isNaN(blankNum)) {
-                            return (
-                              <input
-                                key={pIdx}
-                                type="text"
-                                value={b.userBlanks[blankNum] || ''}
-                                onChange={(e) => handleBlankChange(b.id, blankNum, e.target.value)}
-                                placeholder="isi di sini"
-                                className="inline-block mx-1 px-2 py-0.5 rounded bg-[#1e293b] border border-[#475569] text-xs font-mono text-amber-300 w-28 text-center focus:outline-none focus:border-[#38bdf8]"
-                              />
-                            );
-                          }
-                          return <span key={pIdx}>{part}</span>;
-                        })}
-                      </span>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-mono text-xs text-[#64748b] select-none">{idx + 1}.</span>
+                        <span className="font-mono text-xs text-[#38bdf8]">
+                          {b.template.split(/\{(\d+)\}/).map((part, pIdx) => {
+                            const blankNum = parseInt(part, 10);
+                            if (!isNaN(blankNum)) {
+                              return (
+                                <input
+                                  key={pIdx}
+                                  type="text"
+                                  value={b.userBlanks[blankNum] || ''}
+                                  onChange={(e) => handleBlankChange(b.id, blankNum, e.target.value)}
+                                  placeholder="isi di sini"
+                                  className="inline-block mx-1 px-2 py-0.5 rounded bg-[#1e293b] border border-[#475569] text-xs font-mono text-amber-300 w-28 text-center focus:outline-none focus:border-[#38bdf8]"
+                                />
+                              );
+                            }
+                            return <span key={pIdx}>{part}</span>;
+                          })}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => moveL2(idx, -1)}
+                          disabled={idx === 0}
+                          className="px-2 py-0.5 rounded text-xs bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-30"
+                        >
+                          ▲
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => moveL2(idx, 1)}
+                          disabled={idx === l2Placed.length - 1}
+                          className="px-2 py-0.5 rounded text-xs bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-30"
+                        >
+                          ▼
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveL2(b.id)}
+                          className="text-red-400 hover:text-red-300 text-xs px-2 py-0.5 ml-1"
+                        >
+                          ✕
+                        </button>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => moveL2(idx, -1)}
-                        disabled={idx === 0}
-                        className="px-2 py-0.5 rounded text-xs bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-30"
-                      >
-                        ▲
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => moveL2(idx, 1)}
-                        disabled={idx === l2Placed.length - 1}
-                        className="px-2 py-0.5 rounded text-xs bg-[#1e293b] text-white hover:bg-[#334155] disabled:opacity-30"
-                      >
-                        ▼
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveL2(b.id)}
-                        className="text-red-400 hover:text-red-300 text-xs px-2 py-0.5 ml-1"
-                      >
-                        ✕
-                      </button>
+                    {/* Kolom Alasan Logis Tiap Baris L2 */}
+                    <div className="w-full flex flex-col gap-1 bg-[#1e293b] p-2 rounded-lg border border-slate-700">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="text-slate-300 font-sans">
+                          💡 <strong>Alasan:</strong> {l2Reasons[b.id] || '(Belum ada alasan)'}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => promptEditL2Reason(b, idx + 1)}
+                          className="text-[#38bdf8] hover:underline text-[10px] ml-2 shrink-0 font-sans font-semibold"
+                        >
+                          ✎ Ubah Alasan
+                        </button>
+                      </div>
+                      {l2Evaluations[b.id] && (
+                        <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-700/60 text-[10px]">
+                          <span className="text-slate-400 font-sans">{l2Evaluations[b.id].feedback}</span>
+                          <span className={`px-2 py-0.5 rounded-full font-bold border shrink-0 ${l2Evaluations[b.id].badgeClass}`}>
+                            {l2Evaluations[b.id].badgeLabel}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -529,8 +807,10 @@ export default function ParsonsPage() {
 
           <p className="text-xs text-[#464555] leading-relaxed">
             Di <strong>Lab Python</strong>, kamu akan memiliki editor mandiri berbasis CodeMirror 6,
-            menjalankan Python langsung di browsermu dengan Pyodide, mengamati output terminal,
-            dan menguji kode dengan <em>test cases</em> otomatis.
+            menjalankan Python langsung di browsermu dengan Pyodide, dan menguji kode dengan <em>test cases</em> adaptif
+            (kamu bebas memakai nama variabel sendiri seperti <code className="font-mono bg-white px-1 rounded">jumlah</code>,{' '}
+            <code className="font-mono bg-white px-1 rounded">jumlah_porsi</code>, <code className="font-mono bg-white px-1 rounded">qty</code>,{' '}
+            atau <code className="font-mono bg-white px-1 rounded">total_harga</code>).
           </p>
 
           <button
@@ -544,6 +824,75 @@ export default function ParsonsPage() {
             💻 Buka Lab Python Sekarang →
           </button>
         </Card>
+      )}
+
+      {/* MODAL ALASAN PENEMPATAN BLOK KODE (LEVEL 1 & 2) */}
+      {pendingBlock && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl border-2 border-[#68b6f7] shadow-2xl max-w-lg w-full p-5 flex flex-col gap-3.5 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-[#eaf6ff] pb-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">✍️</span>
+                <h3 className="font-bold text-sm text-[#121c2c]">
+                  Alasan Penempatan Baris Kode (Level {pendingBlock.level})
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPendingBlock(null)}
+                className="size-7 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-bold flex items-center justify-center"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-3 rounded-2xl bg-[#0f172a] border border-[#334155] text-white flex flex-col gap-1 font-mono text-xs">
+              <span className="text-[10px] text-slate-400 uppercase font-sans font-bold">
+                Baris ke-{pendingBlock.lineNo ?? (pendingBlock.level === 1 ? l1Placed.length + 1 : l2Placed.length + 1)}:
+              </span>
+              <code className="text-[#38bdf8]">
+                {pendingBlock.level === 1
+                  ? pendingBlock.blockL1?.code
+                  : pendingBlock.blockL2?.template.replace(/\{(\d+)\}/g, '____')}
+              </code>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="parsons-reason-input" className="text-xs font-bold text-[#121c2c]">
+                Mengapa baris kode ini kamu tempatkan pada urutan ini? *
+              </label>
+              <textarea
+                id="parsons-reason-input"
+                rows={3}
+                value={blockReasonInput}
+                onChange={(e) => setBlockReasonInput(e.target.value)}
+                placeholder="Tuliskan alasan logismu mengapa menaruh baris ini pada urutan tersebut..."
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#bce0fd] text-xs text-[#121c2c] bg-white focus:outline-none focus:ring-2 focus:ring-[#68b6f7] resize-none"
+              />
+              <span className="text-[10px] text-slate-500">
+                Wajib diisi minimal 4 karakter sebagai bukti pemahaman logika urutan eksekusi program.
+              </span>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-1 border-t border-[#eaf6ff]">
+              <button
+                type="button"
+                onClick={() => setPendingBlock(null)}
+                className="px-4 py-2 rounded-full text-xs font-semibold text-[#464555] hover:bg-slate-100 transition"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmPlaceBlock}
+                disabled={blockReasonInput.trim().length < 4}
+                className="px-5 py-2 rounded-full text-xs font-bold text-white bg-[#253f8a] hover:brightness-110 disabled:opacity-40 transition shadow-sm"
+              >
+                ✓ Simpan Baris &amp; Alasan
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Demo Skip Toolbar */}

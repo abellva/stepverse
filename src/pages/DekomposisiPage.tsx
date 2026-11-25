@@ -45,6 +45,70 @@ const SLOT_LABELS = [
   'Langkah 4: Cetak Output',
 ];
 
+export interface DekomEvaluation {
+  status: 'bener' | 'mendekati' | 'salah';
+  badgeLabel: string;
+  badgeClass: string;
+  feedback: string;
+}
+
+function evaluateDekomposisiReason(slots: (DekomCard | null)[], reasonText: string): DekomEvaluation {
+  const allFilled = slots.every(Boolean);
+  const allCorrect = allFilled && slots.every((card, i) => card && card.correctSlot === i + 1);
+  const clean = reasonText.trim().toLowerCase();
+
+  if (!allCorrect) {
+    return {
+      status: 'salah',
+      badgeLabel: '❌ Urutan Langkah Belum Sesuai',
+      badgeClass: 'bg-red-50 text-red-950 border-red-300',
+      feedback:
+        'Urutan langkah dekomposisi belum tepat atau terdapat kartu pengecoh yang keliru dimasukkan. Pastikan program menerima input sebelum menghitung, dan mencetak nota setelah kalkulasi selesai.',
+    };
+  }
+
+  if (clean.length < 8 || clean.includes('gatau') || clean.includes('asal') || clean.includes('tebak')) {
+    return {
+      status: 'mendekati',
+      badgeLabel: '⚠️ Alasan Mendekati (Perlu Diperjelas)',
+      badgeClass: 'bg-amber-50 text-amber-950 border-amber-300',
+      feedback:
+        'Urutan langkah sudah benar! Namun alasan logismu masih terlalu singkat. Jelaskan mengapa input harus mendahului perhitungan dan mengapa kartu database/login diabaikan.',
+    };
+  }
+
+  const hasSequenceConcept = /input|masuk|data|hitung|kali|proses|cetak|struk|nota|tampil|output|urut|sebelum|sesudah|awal|akhir/i.test(clean);
+  const hasAbstractionConcept = /abstraksi|saring|filter|buang|tidak|pengecoh|distractor|database|login|belum/i.test(clean);
+
+  if (hasSequenceConcept && hasAbstractionConcept) {
+    return {
+      status: 'bener',
+      badgeLabel: '✅ Alasan Sangat Tepat & Logis (Bener)',
+      badgeClass: 'bg-emerald-50 text-emerald-950 border-emerald-300',
+      feedback:
+        'Luar biasa! Pemikiran komputasionalmu lengkap: kamu memahami bahwa input data harus tersedia sebelum proses perkalian, struk dicetak di akhir, dan kartu database/login disaring melalui abstraksi karena belum diperlukan.',
+    };
+  }
+
+  if (hasSequenceConcept) {
+    return {
+      status: 'bener',
+      badgeLabel: '✅ Logika Urutan Tepat (Bener)',
+      badgeClass: 'bg-emerald-50 text-emerald-950 border-emerald-300',
+      feedback:
+        'Tepat sekali! Kamu memahami urutan eksekusi logis program kasir: data diterima (input), dihitung totalnya (proses), lalu disajikan struknya (output).',
+    };
+  }
+
+  return {
+    status: 'mendekati',
+    badgeLabel: '⚠️ Alasan Mendekati',
+    badgeClass: 'bg-amber-50 text-amber-950 border-amber-300',
+    feedback:
+      'Urutan langkah sudah tepat! Alasanmu sudah cukup baik, namun ingat prinsip dekomposisi: data kasir harus ada terlebih dahulu sebelum dikalikan.',
+  };
+}
+
 function shuffle<T>(arr: T[]): T[] {
   return [...arr].sort(() => Math.random() - 0.5);
 }
@@ -54,18 +118,29 @@ export default function DekomposisiPage() {
   const navigate = useNavigate();
   const materiId = Number(id);
   const materi = MATERI_LIST.find((m) => m.id === materiId);
-  const { setProgress, setAnswer, incrementAttempt, answers, demoMode, progress } = useAppStore();
+  const {
+    setProgress,
+    setAnswer,
+    incrementAttempt,
+    answers,
+    demoMode,
+    progress,
+    enterStage,
+    recordStageFailure,
+  } = useAppStore();
 
   const savedSlots = answers[`${materiId}-dekomposisi`] as (string | null)[] | undefined;
-  const savedReason = (answers[`${materiId}-dekomposisi-reason`] as string) ?? '';
+  const savedReason = (answers[`${materiId}-dekomposisi-reason`] as string | undefined) ?? '';
+  const savedReasonEval = answers[`${materiId}-dekomposisi-evaluation`] as DekomEvaluation | undefined;
 
   const [pool, setPool] = useState<DekomCard[]>(() => shuffle(CARDS));
-  const [reason, setReason] = useState<string>(savedReason);
   const [slots, setSlots] = useState<(DekomCard | null)[]>(
     savedSlots
       ? savedSlots.map((s) => (s ? CARDS.find((c) => c.id === s) ?? null : null))
       : [null, null, null, null]
   );
+  const [reason, setReason] = useState<string>(savedReason);
+  const [reasonEval, setReasonEval] = useState<DekomEvaluation | null>(savedReasonEval ?? null);
   const [feedback, setFeedback] = useState<('correct' | 'wrong' | null)[]>([null, null, null, null]);
   const [checked, setChecked] = useState(false);
   const [canProceed, setCanProceed] = useState(false);
@@ -79,6 +154,10 @@ export default function DekomposisiPage() {
   );
 
   useEffect(() => {
+    enterStage('dekomposisi');
+  }, [enterStage, materiId]);
+
+  useEffect(() => {
     if (progress[`${materiId}-dekomposisi`] === 'done') setCanProceed(true);
   }, [materiId, progress]);
 
@@ -90,6 +169,8 @@ export default function DekomposisiPage() {
   }, []);
 
   if (!materi) return <div className="p-6 text-red-500">Materi tidak ditemukan.</div>;
+
+  const isReasonValid = reason.trim().length >= 5;
 
   function placeCard(card: DekomCard, slotIndex: number) {
     const prev = slots[slotIndex];
@@ -156,19 +237,51 @@ export default function DekomposisiPage() {
     setFeedback(fb);
     setChecked(true);
 
+    const evaluation = evaluateDekomposisiReason(slots, reason);
+    setReasonEval(evaluation);
+    setAnswer(`${materiId}-dekomposisi-evaluation`, evaluation);
+    setAnswer(`${materiId}-dekomposisi-reason`, reason.trim());
+
     const allCorrect = slots.every((card, i) => card && card.correctSlot === i + 1);
-    if (allCorrect) {
+    const isReasonAcceptable = evaluation.status !== 'salah';
+
+    import('../services/logger').then(({ logEvent }) => {
+      logEvent({
+        stage: 'dekomposisi',
+        componentId: 'dekomposisi-check',
+        ctComponent: 'decomposition',
+        result: allCorrect && isReasonAcceptable ? 'pass' : 'fail',
+        payload: {
+          slots: slots.map((c) => c?.id ?? null),
+          reason: reason.trim(),
+          evaluation,
+        },
+      });
+    });
+
+    if (allCorrect && isReasonAcceptable) {
       setCanProceed(true);
-      const currentAttempts = (answers[`${materiId}-dekomposisi-attempts`] as number | undefined ?? 0) + 1;
-      const dekomScore = Math.max(50, 100 - (currentAttempts - 1) * 10);
       setAnswer(`${materiId}-dekomposisi`, slots.map((c) => c?.id ?? null));
-      setAnswer(`${materiId}-dekomposisi-score`, dekomScore);
+      setAnswer(`${materiId}-dekomposisi-score`, 100);
       setProgress(materiId, 'dekomposisi', 'done');
       setProgress(materiId, 'parsons', 'active');
+    } else {
+      setCanProceed(false);
+      recordStageFailure('dekomposisi');
     }
   }
 
+  function handleProceedToParsons() {
+    setAnswer(`${materiId}-dekomposisi`, slots.map((c) => c?.id ?? null));
+    setAnswer(`${materiId}-dekomposisi-score`, 100);
+    setProgress(materiId, 'dekomposisi', 'done');
+    setProgress(materiId, 'parsons', 'active');
+    navigate(`/materi/${materiId}/parsons`);
+  }
+
   function handleDemoSkip() {
+    setAnswer(`${materiId}-dekomposisi`, slots.map((c) => c?.id ?? null));
+    setAnswer(`${materiId}-dekomposisi-score`, 100);
     setProgress(materiId, 'dekomposisi', 'done');
     setProgress(materiId, 'parsons', 'active');
     navigate(`/materi/${materiId}/parsons`);
@@ -227,42 +340,62 @@ export default function DekomposisiPage() {
         </div>
       </DndContext>
 
+      {/* Kolom Alasan Logis */}
+      <Card className="mb-5 border border-[#bce0fd]">
+        <label
+          htmlFor="dekomposisi-reason"
+          className="text-xs font-bold text-[#253f8a] flex items-center justify-between gap-2 mb-1.5"
+        >
+          <span>✍️ Alasan Logis Penyusunan Urutan &amp; Penyaringan Kartu:</span>
+          <span className="text-[11px] font-normal text-[#64748b]">Wajib diisi (min. 5 karakter)</span>
+        </label>
+        <textarea
+          id="dekomposisi-reason"
+          rows={2}
+          value={reason}
+          onChange={(e) => {
+            setReason(e.target.value);
+            setChecked(false);
+          }}
+          placeholder="Tuliskan alasan logismu mengenai urutan tahapan yang kamu susun..."
+          className="w-full px-3.5 py-2.5 rounded-xl bg-[#f8fbff] border border-[#c0d8ef] text-xs sm:text-sm text-[#121c2c] focus:outline-none focus:ring-2 focus:ring-[#68b6f7] resize-none"
+        />
+      </Card>
+
+      {/* Evaluasi Alasan Adaptif */}
+      {checked && reasonEval && (
+        <Card
+          className={`mb-4 border-2 p-4 flex flex-col gap-2 ${
+            reasonEval.status === 'bener'
+              ? 'bg-emerald-50/70 border-emerald-300'
+              : reasonEval.status === 'mendekati'
+              ? 'bg-amber-50/70 border-amber-300'
+              : 'bg-red-50/70 border-red-300'
+          }`}
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="text-xs font-bold text-[#121c2c]">Umpan Balik Logika Dekomposisi:</span>
+            <span className={`px-3 py-0.5 rounded-full text-xs font-bold border ${reasonEval.badgeClass}`}>
+              {reasonEval.badgeLabel}
+            </span>
+          </div>
+          <p className="text-xs sm:text-sm text-[#334155] leading-relaxed">
+            {reasonEval.feedback}
+          </p>
+        </Card>
+      )}
+
       {/* Feedback Message */}
-      {checked && !canProceed && (
+      {checked && !canProceed && !reasonEval && (
         <div role="alert" className="mb-4 p-4 rounded-2xl bg-red-50 border border-red-200 text-sm text-red-700 leading-relaxed shadow-sm">
           <strong>Perhatian:</strong> Masih ada langkah yang belum tepat urutannya atau kartu pengecoh yang keliru ditempatkan.
-          Periksa kartu bertanda ❌ dan cermati petunjuk perbaikannya!
+          Periksa kartu bertanda ❌ atau diskusikan di Chat Kelompok!
         </div>
       )}
       {canProceed && (
         <div role="alert" className="mb-4 p-4 rounded-2xl bg-green-50 border border-green-200 text-sm text-green-700 font-semibold shadow-sm flex items-center gap-2">
           <span className="text-xl">🎉</span>
-          <span>Hebat! Dekomposisi masalah kasir sudah tepat dan logis. Tuliskan alasan di bawah sebelum lanjut ke Parsons Problem.</span>
-        </div>
-      )}
-
-      {/* Kolom Alasan / Argumen Siswa */}
-      {canProceed && (
-        <div className="mb-6 p-4 rounded-2xl bg-[#f8fbff] border border-[#bce0fd] flex flex-col gap-2 shadow-xs">
-          <label className="text-xs font-bold text-[#1b2f68] flex items-center justify-between">
-            <span>✍️ Tuliskan Alasan / Argumen Urutan Langkah (Wajib Sebelum Lanjut):</span>
-            <span className={`text-[10px] font-normal ${reason.trim().length >= 10 ? 'text-green-600 font-bold' : 'text-slate-400'}`}>
-              {reason.trim().length >= 10 ? '✓ Alasan terisi' : 'Minimal 10 karakter'}
-            </span>
-          </label>
-          <p className="text-[11px] text-[#464555]">
-            Jelaskan secara logis mengapa urutan program kasir harus dimulai dari menerima input data barang, menghitung total, menyusun format struk, hingga mencetak ke layar (dan mengapa langkah login/database belum relevan):
-          </p>
-          <textarea
-            value={reason}
-            onChange={(e) => {
-              setReason(e.target.value);
-              setAnswer(`${materiId}-dekomposisi-reason`, e.target.value);
-            }}
-            placeholder="Tuliskan argumen urutan logika kelompokmu di sini..."
-            rows={3}
-            className="w-full p-3 rounded-xl border border-[#c0d8ef] text-xs text-[#121c2c] bg-white focus:outline-none focus:border-[#253f8a] resize-none"
-          />
+          <span>Hebat! Dekomposisi masalah kasir dan alasan logismu sudah tepat. Siap lanjut ke Parsons Problem!</span>
         </div>
       )}
 
@@ -282,7 +415,7 @@ export default function DekomposisiPage() {
             <button
               type="button"
               onClick={handleCheck}
-              disabled={slots.some((s) => !s)}
+              disabled={slots.some((s) => !s) || !isReasonValid}
               className="px-6 py-3 rounded-full font-bold text-sm text-[#253f8a] transition-all disabled:opacity-40 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-[#68b6f7] outline-none active:scale-95"
               style={{
                 background: '#eaf6ff',
@@ -296,15 +429,12 @@ export default function DekomposisiPage() {
           )}
           <button
             type="button"
-            onClick={() => {
-              setAnswer(`${materiId}-dekomposisi-reason`, reason.trim());
-              navigate(`/materi/${materiId}/parsons`);
-            }}
-            disabled={!canProceed || reason.trim().length < 10}
+            onClick={handleProceedToParsons}
+            disabled={!canProceed}
             className="inline-flex items-center gap-2 font-bold rounded-full px-6 py-3 text-sm text-white transition-all hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-blue-400 outline-none active:scale-95"
             style={{
-              background: canProceed && reason.trim().length >= 10 ? 'linear-gradient(to bottom, #68b6f7, #3d6b91)' : '#c0cfe0',
-              boxShadow: canProceed && reason.trim().length >= 10
+              background: canProceed ? 'linear-gradient(to bottom, #68b6f7, #3d6b91)' : '#c0cfe0',
+              boxShadow: canProceed
                 ? '0 14px 20px -4px rgba(61,107,145,0.45), inset 0 2px 3px rgba(255,255,255,0.7), inset 0 -3px 0 #253f8a'
                 : 'none',
             }}

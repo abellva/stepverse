@@ -1,5 +1,6 @@
 import { MATERI_LIST } from '../data/curriculum';
 import { StudentRecord } from '../services/studentStorage';
+import type { ChatMessageRecord } from '../services/researchApi';
 
 export type CtComponentKey =
   | 'decomposition'
@@ -49,7 +50,7 @@ export const CT_COMPONENT_META: CtComponentMeta[] = [
     shortLabel: 'Debugging',
     icon: '🐛',
     desc: 'Mengidentifikasi dan memperbaiki error sintaks maupun logika variabel di Python.',
-    sourceLabel: 'Lab Python & Penggunaan Hint',
+    sourceLabel: 'Lab Python & Debugging Mandiri',
   },
   {
     key: 'iteration',
@@ -385,6 +386,91 @@ export function generateStudentsCsv(
     .join('\n');
 }
 
+/** Ekspor log percakapan diskusi kelompok kecil untuk analisis penelitian. */
+export function generateChatLogsCsv(messages: ChatMessageRecord[]): string {
+  const headers = [
+    'ID Pesan',
+    'Waktu (ISO)',
+    'Kelompok',
+    'Nama Pengirim',
+    'Peran',
+    'Sub-bab',
+    'Isi Pesan',
+  ];
+  const rows = messages.map((m) => [
+    m.id,
+    m.timestamp,
+    m.groupId,
+    m.senderName,
+    m.senderRole === 'guru' ? 'Guru Fasilitator' : 'Siswa',
+    m.stage,
+    m.message,
+  ]);
+
+  return [headers, ...rows]
+    .map((row) => row.map((cell) => escapeCsvCell(cell)).join(','))
+    .join('\n');
+}
+
+function summarizeTestReasons(rawResult: unknown): string {
+  if (!rawResult || typeof rawResult !== 'object') return '-';
+  const reasons = (rawResult as { reasons?: Record<string, string> }).reasons;
+  if (!reasons || typeof reasons !== 'object') return '-';
+  const entries = Object.entries(reasons)
+    .filter(([, v]) => typeof v === 'string' && v.trim().length > 0)
+    .map(([k, v]) => `No.${Number(k) + 1}: ${v.trim()}`);
+  return entries.length > 0 ? entries.join(' | ') : '-';
+}
+
+/** Ekspor kolom alasan logis siswa dari seluruh sub-bab & tes. */
+export function generateReasonsCsv(records: StudentRecord[]): string {
+  const headers = [
+    'Nama Siswa',
+    'NISN',
+    'Kelas',
+    'Kelompok',
+    'Alasan Prediksi Video',
+    'Alasan IPO (Input)',
+    'Alasan IPO (Proses)',
+    'Alasan IPO (Output)',
+    'Alasan Dekomposisi',
+    'Alasan Pretest',
+    'Alasan Post-test',
+  ];
+
+  const rows = records.map((rec) => {
+    const pausePoints = rec.answers['1-video-pause-points'] as
+      | Record<string, { reason?: string }>
+      | undefined;
+    const predReason = pausePoints?.['m1-prediction']?.reason || '-';
+    const ipoReasons = (rec.answers['1-ipo-reasons'] as
+      | { input?: string; process?: string; output?: string }
+      | undefined) || {};
+    const dekomReason =
+      typeof rec.answers['1-dekomposisi-reason'] === 'string'
+        ? rec.answers['1-dekomposisi-reason']
+        : '-';
+
+    return [
+      rec.nama,
+      rec.nisn,
+      rec.kelas,
+      rec.kelompok || '-',
+      predReason,
+      ipoReasons.input || '-',
+      ipoReasons.process || '-',
+      ipoReasons.output || '-',
+      dekomReason,
+      summarizeTestReasons(rec.answers['pretest_result']),
+      summarizeTestReasons(rec.answers['posttest_result']),
+    ];
+  });
+
+  return [headers, ...rows]
+    .map((row) => row.map((cell) => escapeCsvCell(cell)).join(','))
+    .join('\n');
+}
+
 /** Unduh string CSV sebagai file di browser. */
 export function downloadCsvFile(filename: string, csvContent: string): void {
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -395,4 +481,5 @@ export function downloadCsvFile(filename: string, csvContent: string): void {
   link.click();
   URL.revokeObjectURL(url);
 }
+
 

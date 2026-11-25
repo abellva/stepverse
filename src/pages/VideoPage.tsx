@@ -26,10 +26,23 @@ export default function VideoPage() {
   const materiId = Number(id);
   const materi = MATERI_LIST.find((m) => m.id === materiId);
 
-  const { setProgress, setAnswer, demoMode, progress, answers, user } = useAppStore();
+  const {
+    setProgress,
+    setAnswer,
+    demoMode,
+    progress,
+    answers,
+    user,
+    enterStage,
+    recordVideoReplay,
+    telemetry,
+  } = useAppStore();
   const videoRef = useRef<HTMLVideoElement>(null);
   const pauseBannerRef = useRef<HTMLDivElement>(null);
   const maxWatchedRef = useRef(0);
+  const lastPlaybackTimeRef = useRef(0);
+  const hasEndedOnceRef = useRef(false);
+  const lastReplayRecordedAtRef = useRef(0);
   const [videoDuration, setVideoDuration] = useState<number>(FALLBACK_SIM_DURATION_SECONDS);
   const [canProceed, setCanProceed] = useState(false);
   const [showTranscript, setShowTranscript] = useState(false);
@@ -58,6 +71,10 @@ export default function VideoPage() {
   const isPretestDone = !!answers['pretest_result'];
   const isVideoMarkedDone = progress[`${materiId}-video`] === 'done';
 
+  useEffect(() => {
+    enterStage('video');
+  }, [enterStage, materiId]);
+
   // Reset UI state saat berganti materi atau akun siswa
   useEffect(() => {
     activePausePointIdRef.current = null;
@@ -66,6 +83,8 @@ export default function VideoPage() {
     setIsSimulating(false);
     setSimulatedTime(0);
     setVideoError(false);
+    lastPlaybackTimeRef.current = 0;
+    hasEndedOnceRef.current = false;
     if (videoRef.current?.duration && !isNaN(videoRef.current.duration)) {
       setVideoDuration(videoRef.current.duration);
     }
@@ -109,6 +128,21 @@ export default function VideoPage() {
 
   const videoSrc = materi.videoSrc ?? `/video/materi${materiId}.mp4`;
 
+  function registerReplayEvent(reason: string, currentSec?: number) {
+    const now = Date.now();
+    // Debounce agar event seeking berturut-turut tidak dihitung ganda dalam 2 detik
+    if (now - lastReplayRecordedAtRef.current < 2000) return;
+    lastReplayRecordedAtRef.current = now;
+    recordVideoReplay();
+    logEvent({
+      stage: 'video',
+      componentId: 'video-replay',
+      ctComponent: 'abstraction',
+      result: 'info',
+      payload: { reason, atSecond: currentSec ?? 0 },
+    });
+  }
+
   function getFreshCompletionsSnapshot() {
     const storeState = useAppStore.getState();
     return readPausePointCompletions(storeState.answers, materiId);
@@ -145,6 +179,11 @@ export default function VideoPage() {
     const v = videoRef.current;
     if (!v || !v.duration || isNaN(v.duration)) return;
 
+    // Update waktu terakhir jika tidak sedang meloncat mundur jauh
+    if (v.currentTime >= lastPlaybackTimeRef.current) {
+      lastPlaybackTimeRef.current = v.currentTime;
+    }
+
     const freshCompletions = getFreshCompletionsSnapshot();
     const triggered = findTriggeredPausePoint(v.currentTime, pausePoints, freshCompletions);
 
@@ -178,6 +217,12 @@ export default function VideoPage() {
     const v = videoRef.current;
     if (!v || !v.duration || isNaN(v.duration)) return;
 
+    // Deteksi mundur/rewind >= 5 detik sebagai pemutaran ulang bagian video
+    if (lastPlaybackTimeRef.current - v.currentTime >= 5) {
+      registerReplayEvent('rewind', Math.round(v.currentTime));
+    }
+    lastPlaybackTimeRef.current = v.currentTime;
+
     const freshCompletions = getFreshCompletionsSnapshot();
     const triggered = findTriggeredPausePoint(v.currentTime, pausePoints, freshCompletions);
     if (triggered) {
@@ -189,9 +234,17 @@ export default function VideoPage() {
     }
   }
 
+  function handleVideoEnded() {
+    hasEndedOnceRef.current = true;
+  }
+
   function handleVideoPlay() {
     const v = videoRef.current;
     if (!v) return;
+    if (hasEndedOnceRef.current && v.currentTime < 5) {
+      hasEndedOnceRef.current = false;
+      registerReplayEvent('replay_after_end', 0);
+    }
     const freshCompletions = getFreshCompletionsSnapshot();
     const openPausePoint = pausePoints.find((pp) => pp.id === activePausePointIdRef.current);
     // Lanjutkan pemutaran hanya setelah aktivitas pada pause point selesai atau dilewati (demo/opsional)
@@ -211,7 +264,7 @@ export default function VideoPage() {
 
   function handleCompletePausePoint(
     pp: PausePoint,
-    meta?: { selectedOptionId?: string; isCorrect?: boolean; skipped?: boolean; reason?: string }
+    meta?: { selectedOptionId?: string; isCorrect?: boolean; reason?: string; skipped?: boolean }
   ) {
     const freshCompletions = getFreshCompletionsSnapshot();
     const nextCompletions: MateriPausePointMap = {
@@ -255,6 +308,7 @@ export default function VideoPage() {
     setReviewPausePointId(null);
     setAnswer(getPausePointStorageKey(materiId), {});
     setAnswer(`${materiId}-simulasi`, { role1Done: false, role2Done: false });
+    registerReplayEvent('manual_reset_replay', 0);
   }
 
   function runFallbackSimulation(
@@ -373,6 +427,7 @@ export default function VideoPage() {
             onTimeUpdate={handleTimeUpdate}
             onSeeking={handleSeeking}
             onPlay={handleVideoPlay}
+            onEnded={handleVideoEnded}
             onError={() => setVideoError(true)}
             preload="metadata"
           >
@@ -428,7 +483,7 @@ export default function VideoPage() {
               <span>
                 {activePausePoint.type === 'kinesthetic'
                   ? 'Lakukan aktivitas kinestetik berpasangan di bawah ini untuk melanjutkan pemutaran.'
-                  : 'Jawab pertanyaan prediksi di bawah (opsional) untuk melanjutkan pemutaran.'}
+                  : 'Jawab pertanyaan prediksi dan tuliskan alasan logismu di bawah untuk melanjutkan pemutaran.'}
               </span>
             </div>
             <span className="text-[11px] font-mono font-semibold text-amber-800 shrink-0">
@@ -488,8 +543,15 @@ export default function VideoPage() {
                 </button>
               )}
             </span>
-            <span className="font-mono">
-              {watchedPct}% {canProceed ? '✅ (Lolos ≥95%)' : '(perlu ≥95%)'}
+            <span className="font-mono flex items-center gap-2">
+              {telemetry.videoReplayCount > 0 && (
+                <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#eaf6ff] text-[#253f8a] border border-[#bce0fd]">
+                  🔁 {telemetry.videoReplayCount}× putar ulang
+                </span>
+              )}
+              <span>
+                {watchedPct}% {canProceed ? '✅ (Lolos ≥95%)' : '(perlu ≥95%)'}
+              </span>
             </span>
           </div>
           <div className="w-full h-2.5 rounded-full bg-[#eaf6ff] overflow-hidden relative">
@@ -624,14 +686,20 @@ export default function VideoPage() {
         </button>
         {showTranscript && (
           <div className="mt-4 text-sm text-[#464555] space-y-2.5 border-t border-[#eaf6ff] pt-4 leading-relaxed">
-            <p><strong>[00:00]</strong> Bu Ani punya kantin yang ramai. Catatan pesanan di kertas makin berantakan—bisakah program membantu?</p>
-            <p><strong>[00:10]</strong> Rani memecah masalah: untuk satu pesanan dibutuhkan tiga data—nama pembeli, harga satuan, dan jumlah porsi.</p>
-            <p><strong>[00:20]</strong> Komputer menyimpan data di tempat bernama variabel, seperti kotak di dalam memori yang punya label (nama variabel) dan nilai.</p>
-            <p><strong>[01:00]</strong> Nilai punya tipe data (teks, bilangan bulat, desimal). Mengisi kotak disebut penugasan menggunakan tanda sama dengan (<code className="bg-[#eaf6ff] px-1 rounded">=</code>).</p>
-            <p><strong>[02:20]</strong> <em>[Jeda Simulasi Kinestetik]</em> Sekarang giliran kalian melakukan simulasi peran Programmer dan Komputer.</p>
-            <p><strong>[02:30]</strong> Saat nilai variabel <code className="bg-[#eaf6ff] px-1 rounded">jumlah_porsi</code> diganti, nilai lama hilang—namun hasil hitungan <code className="bg-[#eaf6ff] px-1 rounded">total_harga</code> yang sudah disimpan tidak otomatis berubah.</p>
-            <p><strong>[03:04]</strong> <em>[Jeda Prediksi Konsep]</em> Menurutmu, isi kotak <code className="bg-[#eaf6ff] px-1 rounded">total_harga</code> sekarang <code className="bg-[#eaf6ff] px-1 rounded">16000</code> atau <code className="bg-[#eaf6ff] px-1 rounded">24000</code>? Untuk memperbaruinya, hitung ulang lalu simpan lagi hasilnya.</p>
-            <p><strong>[03:18]</strong> Beri nama variabel yang jelas tanpa spasi, perhatikan kesamaan penulisan nama variabel, serta bedakan teks dengan angka.</p>
+            <p><strong>[00:00] Masalah Kasir Kantin Bu Ani:</strong> Kantin Bu Ani sedang ramai pembeli. Catatan pesanan di kertas nota mulai berantakan, basah, dan sering salah hitung saat ada pesanan bertambah. Rani mengajak kita merancang sistem pencatatan yang teratur di komputer untuk membantu Bu Ani.</p>
+            <p><strong>[00:25] Inkuiri Kebutuhan Wadah:</strong> Untuk memproses pesanan, ada banyak informasi yang harus disimpan: siapa pembelinya, berapa harga makanannya, dan berapa banyak porsinya. Bagaimana cara komputer menyimpan dan membedakan informasi-informasi tersebut di dalam memorinya agar tidak saling bercampur?</p>
+            <p><strong>[00:50] Permisalan Wadah Berlabel:</strong> Bayangkan komputer memiliki rak berisi kotak-kotak berlabel khusus. Kotak berstiker label <code className="bg-[#eaf6ff] px-1 rounded">nama_pembeli</code> untuk menyimpan nama, kotak <code className="bg-[#eaf6ff] px-1 rounded">harga</code> untuk harga satuan, dan kotak <code className="bg-[#eaf6ff] px-1 rounded">jumlah</code> untuk banyaknya porsi.</p>
+            <p><strong>[01:15] Memasukkan Isi ke Wadah (=):</strong> Untuk memasukkan isi ke dalam wadah, kita gunakan tanda penunjuk sama dengan (<code className="bg-[#eaf6ff] px-1 rounded">=</code>). Misalnya: masukkan <code className="bg-[#eaf6ff] px-1 rounded">8000</code> ke wadah berlabel <code className="bg-[#eaf6ff] px-1 rounded">harga</code>, ditulis <code className="bg-[#eaf6ff] px-1 rounded">harga = 8000</code>. Tanda ini bekerja seperti tangan yang menaruh isi dari sisi kanan ke wadah di sisi kiri.</p>
+            <p><strong>[01:40] Membedakan Jenis-Jenis Isi Wadah:</strong> Perhatikan karakteristik isi yang dimasukkan:
+              <br />• <strong>Teks/Kata yang diapit petik:</strong> Wajib dibungkus tanda petik, contoh <code className="bg-[#eaf6ff] px-1 rounded">&quot;Bakso&quot;</code> atau <code className="bg-[#eaf6ff] px-1 rounded">&quot;Ayu&quot;</code>, agar komputer mengenalnya sebagai tulisan biasa dan bukan stiker label wadah.
+              <br />• <strong>Angka murni untuk perhitungan:</strong> Ditulis langsung tanpa petik, contoh <code className="bg-[#eaf6ff] px-1 rounded">8000</code> dan <code className="bg-[#eaf6ff] px-1 rounded">2</code>. Angka murni inilah yang bisa dioperasikan matematika (dikali/dijumlahkan).
+              <br />• <strong>Angka desimal/pecahan:</strong> Contoh <code className="bg-[#eaf6ff] px-1 rounded">0.1</code> untuk diskon 10% atau takaran berkoma.
+              <br />• <strong>Pilihan kepastian (Benar/Salah):</strong> Hanya bernilai <code className="bg-[#eaf6ff] px-1 rounded">True</code> atau <code className="bg-[#eaf6ff] px-1 rounded">False</code>, misalnya untuk mengecek apakah nota belanja sudah dibayar.
+            </p>
+            <p><strong>[02:20] <em>[Jeda Simulasi Kinestetik]</em></strong> Sekarang giliran kalian berpasangan memperagakan peran Programmer dan Komputer untuk mempraktikkan pengisian wadah-wadah fisik ini secara nyata!</p>
+            <p><strong>[02:30] Karakteristik Kotak Penyimpanan:</strong> Satu wadah memori hanya dapat menampung satu isi terbaru. Saat pesanan bertambah dan wadah <code className="bg-[#eaf6ff] px-1 rounded">jumlah</code> diisi dengan angka baru, isi yang lama akan keluar dan tergantikan. Namun, wadah hasil hitungan <code className="bg-[#eaf6ff] px-1 rounded">total_harga</code> yang sudah tersimpan sebelumnya tidak otomatis berganti sendiri.</p>
+            <p><strong>[03:04] <em>[Jeda Prediksi Konsep]</em></strong> Menurutmu, isi kotak <code className="bg-[#eaf6ff] px-1 rounded">total_harga</code> sekarang tetap <code className="bg-[#eaf6ff] px-1 rounded">16000</code> atau otomatis jadi <code className="bg-[#eaf6ff] px-1 rounded">24000</code>? Untuk memperbarui isinya, komputer harus menghitung ulang dan memasukkan kembali hasilnya ke dalam wadah tersebut.</p>
+            <p><strong>[03:18] Aturan Label Wadah &amp; Penutup:</strong> Buatlah stiker label wadah yang jelas tanpa spasi, jangan awali label dengan angka, dan pastikan bentuk isinya sesuai dengan kebutuhan sistem kasir. Siap memecahkan tantangan berikutnya?</p>
           </div>
         )}
       </Card>

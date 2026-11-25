@@ -1,19 +1,20 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router';
-import { registerUser, getAllUsers, KELAS_OPTIONS, SEKOLAH_OPTIONS } from '../data/users';
+import { registerUser, getAllUsers, KELAS_OPTIONS, KELOMPOK_OPTIONS, SEKOLAH_OPTIONS } from '../data/users';
 import { useAppStore } from '../store/useAppStore';
 import { syncActiveUserProgress } from '../services/studentStorage';
 
 export default function DaftarPage() {
   const navigate = useNavigate();
   const { setUser } = useAppStore();
-
+ 
   const [peran, setPeran]       = useState<'siswa' | 'guru'>('siswa');
   const [nama, setNama]         = useState('');
   const [nisn, setNisn]         = useState('');
   const [password, setPassword] = useState('');
   const [konfirmasi, setKonfirmasi] = useState('');
   const [kelas, setKelas]       = useState(KELAS_OPTIONS[0]);
+  const [kelompok, setKelompok] = useState(KELOMPOK_OPTIONS[0]);
   const [sekolah, setSekolah]   = useState(SEKOLAH_OPTIONS[0]);
   const [showPass, setShowPass] = useState(false);
   const [error, setError]       = useState('');
@@ -35,7 +36,15 @@ export default function DaftarPage() {
     setLoading(true);
     await new Promise((r) => setTimeout(r, 300));
 
-    const err = registerUser({ nisn, nama, password, peran, kelas: peran === 'guru' ? '-' : kelas, sekolah });
+    const err = registerUser({
+      nisn,
+      nama,
+      password,
+      peran,
+      kelas: peran === 'guru' ? '-' : kelas,
+      sekolah,
+      kelompok: peran === 'siswa' ? kelompok : undefined,
+    });
     setLoading(false);
 
     if (err) {
@@ -46,7 +55,13 @@ export default function DaftarPage() {
     // Auto-login setelah daftar dengan user ID yang konsisten
     const createdUser = getAllUsers().find((u) => u.nisn.trim() === nisn.trim());
     const userId = createdUser?.id || `user-${Date.now()}`;
-    const userSession = { id: userId, nama, peran, kelas: peran === 'guru' ? '-' : kelas };
+    const userSession = {
+      id: userId,
+      nama,
+      peran,
+      kelas: peran === 'guru' ? '-' : kelas,
+      kelompok: peran === 'siswa' ? kelompok : undefined,
+    };
 
     if (peran === 'siswa') {
       syncActiveUserProgress(userSession, { '1-video': 'active' }, {}, {});
@@ -138,26 +153,38 @@ export default function DaftarPage() {
             />
           </Field>
 
-          {/* Kelas (siswa) */}
+          {/* Kelas & Kelompok (siswa) */}
           {peran === 'siswa' && (
-            <Field label="Kelas & Sekolah" htmlFor="kelas-reg">
-              <div className="grid grid-cols-2 gap-2">
+            <>
+              <Field label="Kelas & Sekolah" htmlFor="kelas-reg">
+                <div className="grid grid-cols-2 gap-2">
+                  <select
+                    id="kelas-reg" value={kelas}
+                    onChange={(e) => setKelas(e.target.value)}
+                    className="field-input cursor-pointer"
+                  >
+                    {KELAS_OPTIONS.map((k) => <option key={k}>{k}</option>)}
+                  </select>
+                  <select
+                    value={sekolah}
+                    onChange={(e) => setSekolah(e.target.value)}
+                    className="field-input cursor-pointer"
+                  >
+                    {SEKOLAH_OPTIONS.map((s) => <option key={s}>{s}</option>)}
+                  </select>
+                </div>
+              </Field>
+              <Field label="Kelompok Belajar Kecil" htmlFor="kelompok-reg">
                 <select
-                  id="kelas-reg" value={kelas}
-                  onChange={(e) => setKelas(e.target.value)}
+                  id="kelompok-reg"
+                  value={kelompok}
+                  onChange={(e) => setKelompok(e.target.value)}
                   className="field-input cursor-pointer"
                 >
-                  {KELAS_OPTIONS.map((k) => <option key={k}>{k}</option>)}
+                  {KELOMPOK_OPTIONS.map((g) => <option key={g} value={g}>{g}</option>)}
                 </select>
-                <select
-                  value={sekolah}
-                  onChange={(e) => setSekolah(e.target.value)}
-                  className="field-input cursor-pointer"
-                >
-                  {SEKOLAH_OPTIONS.map((s) => <option key={s}>{s}</option>)}
-                </select>
-              </div>
-            </Field>
+              </Field>
+            </>
           )}
 
           {/* Password */}

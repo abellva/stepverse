@@ -5,7 +5,7 @@ const imgProfile = `${assetPathPrefix}/5d8e5.png`
 const imgContainer = `${assetPathPrefix}/94de0.svg`
 const imgContainer1 = `${assetPathPrefix}/6b036.svg`
 const imgContainer2 = `${assetPathPrefix}/4b558.svg`
-const imgContainer3 = `${assetPathPrefix}/dd52f.svg`
+const imgContainer3 = `${assetPathPrefix}/dd52f.svg` 
 const imgContainer4 = `${assetPathPrefix}/85690.svg`
 const imgContainer5 = `${assetPathPrefix}/6f4e1.svg`
 const imgContainer6 = `${assetPathPrefix}/4fe25.svg`
@@ -1040,7 +1040,7 @@ export default function StepVerseBerandaSiswaKelasX() {
                               }}
                             >
                               <p className="leading-[28px]">
-                                Materi 2: Tipe Data (String, Integer, Float)
+                                Materi 2: Operator (Aritmatika, Logika, Relasional)
                               </p>
                             </div>
                           </div>

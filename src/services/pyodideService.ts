@@ -220,6 +220,31 @@ function evaluateExpression(
 ): unknown {
   const trimmed = expr.trim();
 
+  // Check if f-string literal: f"..." or f'...'
+  if (
+    (trimmed.startsWith('f"') && trimmed.endsWith('"') && trimmed.length >= 3) ||
+    (trimmed.startsWith("f'") && trimmed.endsWith("'") && trimmed.length >= 3)
+  ) {
+    const template = trimmed.slice(2, -1);
+    return template.replace(/\{([^{}]+)\}/g, (_m, inner: string) => {
+      const val = evaluateExpression(inner, vars, lineNum);
+      return val === undefined || val === null ? '' : String(val);
+    });
+  }
+
+  // Basic int(...), float(...), str(...) calls
+  const castMatch = trimmed.match(/^(int|float|str)\s*\(([\s\S]+)\)$/);
+  if (castMatch) {
+    const fn = castMatch[1];
+    const innerVal = evaluateExpression(castMatch[2], vars, lineNum);
+    if (fn === 'str') return String(innerVal);
+    const num = Number(innerVal);
+    if (isNaN(num)) {
+      throw new Error(`ValueError (Baris ${lineNum}): Tidak dapat mengubah '${innerVal}' menjadi angka ${fn}.`);
+    }
+    return fn === 'int' ? Math.trunc(num) : num;
+  }
+
   // Check if string literal
   if (
     (trimmed.startsWith('"') && trimmed.endsWith('"') && trimmed.length >= 2) ||
@@ -303,6 +328,7 @@ export async function runPythonAsync(
 
   // If worker is already ready, try running inside the worker
   if (isEngineReady && workerInstance) {
+    const worker = workerInstance;
     return new Promise((resolve) => {
       const id = ++currentMessageId;
       let isDone = false;
@@ -324,7 +350,7 @@ export async function runPythonAsync(
         isDone = true;
 
         clearTimeout(watchdogTimer);
-        workerInstance?.removeEventListener('message', onMessage);
+        worker.removeEventListener('message', onMessage);
 
         const timeTaken = Math.max(1, Math.round(performance.now() - startTime));
 
@@ -348,8 +374,8 @@ export async function runPythonAsync(
         }
       }
 
-      workerInstance.addEventListener('message', onMessage);
-      workerInstance.postMessage({ id, code });
+      worker.addEventListener('message', onMessage);
+      worker.postMessage({ id, code });
     });
   }
 

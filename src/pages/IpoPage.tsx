@@ -3,33 +3,141 @@ import { useParams, useNavigate } from 'react-router';
 import { MATERI_LIST, STAGE_LABELS } from '../data/curriculum';
 import { Card } from '../components/ui/Card';
 import { useAppStore } from '../store/useAppStore';
+import { logEvent } from '../services/logger';
 
-interface IpoItem {
+export interface IpoItem {
   id: string;
   label: string;
   category: 'input' | 'process' | 'output';
+  isDistractor?: boolean;
+  correctExplanation: string;
 }
 
-const IPO_ITEMS: IpoItem[] = [
-  { id: 'nama_barang',   label: 'Nama barang',          category: 'input' },
-  { id: 'harga_satuan',  label: 'Harga satuan (Rp)',    category: 'input' },
-  { id: 'jumlah',        label: 'Jumlah beli',          category: 'input' },
-  { id: 'hitung_total',  label: 'total = harga_satuan × jumlah', category: 'process' },
-  { id: 'cetak_struk',   label: 'Cetak struk belanja',  category: 'process' },
-  { id: 'total_harga',   label: 'Total harga (Rp)',     category: 'output' },
-  { id: 'struk',         label: 'Struk belanja tercetak', category: 'output' },
+export const IPO_ITEMS: IpoItem[] = [
+  {
+    id: 'nama_barang',
+    label: 'Nama barang (Tipe String)',
+    category: 'input',
+    correctExplanation: 'Nama barang adalah data masukan awal (Input) bertipe teks (String) yang diketikkan kasir.',
+  },
+  {
+    id: 'harga_satuan',
+    label: 'Harga satuan (Tipe Integer)',
+    category: 'input',
+    correctExplanation: 'Harga satuan adalah data numerik awal (Input) bertipe Integer yang dimasukkan kasir.',
+  },
+  {
+    id: 'jumlah',
+    label: 'Jumlah beli / porsi (Tipe Integer)',
+    category: 'input',
+    correctExplanation: 'Jumlah beli adalah data kuantitas awal (Input) bertipe Integer yang diinputkan pengguna.',
+  },
+  {
+    id: 'hitung_total',
+    label: 'total = harga_satuan × jumlah',
+    category: 'process',
+    correctExplanation: 'Formula total = harga_satuan * jumlah adalah instruksi pengolahan (Proses) matematika oleh CPU.',
+  },
+  {
+    id: 'cetak_struk',
+    label: 'Susun instruksi cetak (print)',
+    category: 'process',
+    correctExplanation: 'Perintah pemanggilan print() adalah instruksi Proses yang memerintahkan komputer menyajikan data.',
+  },
+  {
+    id: 'total_harga',
+    label: 'Total nominal bayar (Rp)',
+    category: 'output',
+    correctExplanation: 'Total nominal bayar adalah informasi hasil akhir (Output) dari kalkulasi yang disajikan ke pembeli.',
+  },
+  {
+    id: 'struk',
+    label: 'Struk nota belanja tercetak',
+    category: 'output',
+    correctExplanation: 'Struk belanja adalah bentuk keluaran fisik/layar (Output) yang diterima oleh pembeli kasir.',
+  },
   // Distractors
-  { id: 'nama_toko',     label: 'Nama toko Bu Ani',     category: 'input' },   // distractor
-  { id: 'simpan_db',     label: 'Simpan ke database',   category: 'process' }, // distractor
+  {
+    id: 'nama_toko',
+    label: 'Nama toko Bu Ani (Detail ekstra)',
+    category: 'input',
+    isDistractor: true,
+    correctExplanation: 'Nama toko adalah detail statis yang tidak perlu diinput berulang kali dalam perhitungan kasir (abstraksi).',
+  },
+  {
+    id: 'simpan_db',
+    label: 'Kirim transaksi ke database cloud',
+    category: 'process',
+    isDistractor: true,
+    correctExplanation: 'Penyimpanan database cloud belum dipelajari di Materi 1 dan bukan bagian inti kasir dasar.',
+  },
 ];
 
 const COLUMNS: { key: 'input' | 'process' | 'output'; label: string; icon: string; color: string }[] = [
-  { key: 'input',   label: 'Input',   icon: '📥', color: '#eaf6ff' },
-  { key: 'process', label: 'Proses',  icon: '⚙️', color: '#fff8e6' },
-  { key: 'output',  label: 'Output',  icon: '📤', color: '#edfff4' },
+  { key: 'input',   label: 'Input (Masukan)',   icon: '📥', color: '#eaf6ff' },
+  { key: 'process', label: 'Proses (Pengolahan)', icon: '⚙️', color: '#fff8e6' },
+  { key: 'output',  label: 'Output (Keluaran)',  icon: '📤', color: '#edfff4' },
 ];
 
-// Shuffle helper
+export interface ItemEvaluation {
+  placedCol: 'input' | 'process' | 'output';
+  reason: string;
+  status: 'bener' | 'mendekati' | 'salah';
+  badgeLabel: string;
+  feedback: string;
+}
+
+function evaluateItemReason(
+  item: IpoItem,
+  targetCol: 'input' | 'process' | 'output',
+  reasonText: string
+): ItemEvaluation {
+  const clean = reasonText.trim().toLowerCase();
+  const isColCorrect = item.category === targetCol;
+
+  if (item.isDistractor) {
+    return {
+      placedCol: targetCol,
+      reason: reasonText.trim(),
+      status: 'mendekati',
+      badgeLabel: '⚠️ Informasi Pengecoh (Distractor)',
+      feedback: `Kartu ini merupakan informasi pengecoh: ${item.correctExplanation}`,
+    };
+  }
+
+  // Jika kolom salah ditempatkan
+  if (!isColCorrect) {
+    const colName = targetCol === 'input' ? 'Input' : targetCol === 'process' ? 'Proses' : 'Output';
+    const trueColName = item.category === 'input' ? 'Input' : item.category === 'process' ? 'Proses' : 'Output';
+    return {
+      placedCol: targetCol,
+      reason: reasonText.trim(),
+      status: 'salah',
+      badgeLabel: '❌ Penempatan Salah',
+      feedback: `Belum tepat! Kamu menempatkan "${item.label}" ke kolom ${colName}. Seharusnya masuk ke ${trueColName} karena: ${item.correctExplanation}`,
+    };
+  }
+
+  // Kolom benar, cek kedalaman alasan logis
+  if (clean.length < 8 || clean.includes('asal') || clean.includes('tebak') || clean.includes('gatau')) {
+    return {
+      placedCol: targetCol,
+      reason: reasonText.trim(),
+      status: 'mendekati',
+      badgeLabel: '⚠️ Alasan Mendekati (Perlu Diperjelas)',
+      feedback: `Penempatan kolommu sudah benar, tetapi alasan logismu masih terlalu singkat. Ingat: ${item.correctExplanation}`,
+    };
+  }
+
+  return {
+    placedCol: targetCol,
+    reason: reasonText.trim(),
+    status: 'bener',
+    badgeLabel: '✅ Tepat & Logis (Bener)',
+    feedback: `Luar biasa! Penempatan dan alasan logismu tepat: ${item.correctExplanation}`,
+  };
+}
+
 function shuffle<T>(arr: T[]): T[] {
   return [...arr].sort(() => Math.random() - 0.5);
 }
@@ -39,72 +147,122 @@ export default function IpoPage() {
   const navigate = useNavigate();
   const materiId = Number(id);
   const materi = MATERI_LIST.find((m) => m.id === materiId);
-  const { setProgress, setAnswer, incrementAttempt, answers, demoMode, progress } = useAppStore();
+  const {
+    setProgress,
+    setAnswer,
+    answers,
+    demoMode,
+    progress,
+    enterStage,
+  } = useAppStore();
 
   const savedAnswers = answers[`${materiId}-ipo`] as Record<string, 'input' | 'process' | 'output'> | undefined;
-  const savedReason = (answers[`${materiId}-ipo-reason`] as string) ?? '';
+  const savedEvaluations = answers[`${materiId}-ipo-evaluations`] as Record<string, ItemEvaluation> | undefined;
 
   const [placed, setPlaced] = useState<Record<string, 'input' | 'process' | 'output'>>(savedAnswers ?? {});
-  const [reason, setReason] = useState<string>(savedReason);
+  const [evaluations, setEvaluations] = useState<Record<string, ItemEvaluation>>(savedEvaluations ?? {});
   const [shuffled] = useState(() => shuffle(IPO_ITEMS));
-  const [feedback, setFeedback] = useState<Record<string, 'correct' | 'wrong' | null>>({});
-  const [checked, setChecked] = useState(false);
-  const [canProceed, setCanProceed] = useState(false);
+
+  // Dialog Alasan tiap memilih blok
+  const [activePrompt, setActivePrompt] = useState<{
+    item: IpoItem;
+    targetCol: 'input' | 'process' | 'output';
+  } | null>(null);
+  const [promptReason, setPromptReason] = useState('');
+  const [viewingFeedbackItem, setViewingFeedbackItem] = useState<IpoItem | null>(null);
 
   useEffect(() => {
-    if (progress[`${materiId}-ipo`] === 'done') setCanProceed(true);
-  }, [materiId, progress]);
+    enterStage('ipo');
+  }, [enterStage, materiId]);
 
   if (!materi) return <div className="p-6 text-red-500">Materi tidak ditemukan.</div>;
 
   const unplaced = shuffled.filter((item) => !(item.id in placed));
 
-  function placeItem(itemId: string, column: 'input' | 'process' | 'output') {
-    setPlaced((prev) => ({ ...prev, [itemId]: column }));
-    setChecked(false);
-    setFeedback({});
+  // Evaluasi kelayakan lanjut
+  const requiredItems = IPO_ITEMS.filter((i) => !i.isDistractor);
+  const allRequiredPlacedCorrectly = requiredItems.every(
+    (i) => placed[i.id] === i.category && evaluations[i.id]?.status !== 'salah'
+  );
+  const placedDistractors = IPO_ITEMS.filter((i) => i.isDistractor && i.id in placed);
+  const canProceed = progress[`${materiId}-ipo`] === 'done' || (allRequiredPlacedCorrectly && placedDistractors.length === 0);
+
+  function handleInitiatePlace(item: IpoItem, col: 'input' | 'process' | 'output') {
+    const existingReason = evaluations[item.id]?.reason ?? '';
+    setPromptReason(existingReason);
+    setActivePrompt({ item, targetCol: col });
   }
 
-  function removeItem(itemId: string) {
-    setPlaced((prev) => {
-      const next = { ...prev };
-      delete next[itemId];
-      return next;
-    });
-    setChecked(false);
-    setFeedback({});
-  }
+  function handleSaveReasonAndPlace() {
+    if (!activePrompt || promptReason.trim().length < 4) return;
+    const { item, targetCol } = activePrompt;
+    const evalResult = evaluateItemReason(item, targetCol, promptReason);
 
-  function handleCheck() {
-    incrementAttempt(`${materiId}-ipo`);
-    const fb: Record<string, 'correct' | 'wrong' | null> = {};
-    for (const item of IPO_ITEMS) {
-      if (item.id in placed) {
-        const correct = placed[item.id] === item.category;
-        fb[item.id] = correct ? 'correct' : 'wrong';
-      }
-    }
-    setFeedback(fb);
-    setChecked(true);
+    const nextPlaced = { ...placed, [item.id]: targetCol };
+    const nextEvals = { ...evaluations, [item.id]: evalResult };
 
-    // Need all non-distractor items placed correctly
-    const correctRequired = IPO_ITEMS.filter((i) => !['nama_toko', 'simpan_db'].includes(i.id));
-    const allRequiredCorrect = correctRequired.every(
-      (i) => placed[i.id] === i.category
+    setPlaced(nextPlaced);
+    setEvaluations(nextEvals);
+    setActivePrompt(null);
+    setViewingFeedbackItem(item);
+
+    setAnswer(`${materiId}-ipo`, nextPlaced);
+    setAnswer(`${materiId}-ipo-evaluations`, nextEvals);
+
+    // Cek apakah semua sudah tuntas dan tidak ada pengecoh tersisa di kolom
+    const requiredDone = requiredItems.every(
+      (req) => nextPlaced[req.id] === req.category && nextEvals[req.id]?.status !== 'salah'
     );
+    const hasDistractor = Object.keys(nextPlaced).some((id) => IPO_ITEMS.find((it) => it.id === id)?.isDistractor);
 
-    if (allRequiredCorrect) {
-      setCanProceed(true);
-      setAnswer(`${materiId}-ipo`, placed);
-      setAnswer(`${materiId}-ipo-score`, 100);
+    if (requiredDone && !hasDistractor) {
       setProgress(materiId, 'ipo', 'done');
       setProgress(materiId, 'dekomposisi', 'active');
+      setAnswer(`${materiId}-ipo-score`, 100);
+      logEvent({
+        stage: 'ipo',
+        componentId: 'ipo-complete',
+        ctComponent: 'abstraction',
+        result: 'pass',
+        payload: { placed: nextPlaced, evals: nextEvals },
+      });
     }
+  }
+
+  function handleRemoveItem(itemId: string) {
+    const nextPlaced = { ...placed };
+    delete nextPlaced[itemId];
+    const nextEvals = { ...evaluations };
+    delete nextEvals[itemId];
+
+    setPlaced(nextPlaced);
+    setEvaluations(nextEvals);
+    setAnswer(`${materiId}-ipo`, nextPlaced);
+    setAnswer(`${materiId}-ipo-evaluations`, nextEvals);
+
+    const requiredDone = requiredItems.every(
+      (req) => nextPlaced[req.id] === req.category && nextEvals[req.id]?.status !== 'salah'
+    );
+    const hasDistractor = Object.keys(nextPlaced).some((id) => IPO_ITEMS.find((it) => it.id === id)?.isDistractor);
+
+    if (requiredDone && !hasDistractor) {
+      setProgress(materiId, 'ipo', 'done');
+      setProgress(materiId, 'dekomposisi', 'active');
+      setAnswer(`${materiId}-ipo-score`, 100);
+    }
+  }
+
+  function handleProceedToDekomposisi() {
+    setProgress(materiId, 'ipo', 'done');
+    setProgress(materiId, 'dekomposisi', 'active');
+    setAnswer(`${materiId}-ipo-score`, 100);
+    navigate(`/materi/${materiId}/dekomposisi`);
   }
 
   function handleDemoSkip() {
     setProgress(materiId, 'ipo', 'done');
     setProgress(materiId, 'dekomposisi', 'active');
+    setAnswer(`${materiId}-ipo-score`, 100);
     navigate(`/materi/${materiId}/dekomposisi`);
   }
 
@@ -115,197 +273,327 @@ export default function IpoPage() {
       .filter(Boolean);
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="text-xs text-[#464555] mb-1 uppercase tracking-widest font-semibold">
-        Materi {materiId} · {STAGE_LABELS.ipo}
+    <div className="max-w-4xl mx-auto flex flex-col gap-5">
+      <div>
+        <div className="text-xs text-[#464555] mb-1 uppercase tracking-widest font-semibold">
+          Materi {materiId} · {STAGE_LABELS.ipo}
+        </div>
+        <h1 className="text-2xl font-bold text-[#121c2c]">{materi.judul}</h1>
+        <p className="text-xs sm:text-sm text-[#464555] mt-1 leading-relaxed">
+          Pilihlah kolom <strong>Input</strong>, <strong>Proses</strong>, atau <strong>Output</strong> untuk setiap kartu kasir di bawah.
+          <strong> Setiap kali kamu memilih satu blok</strong>, tuliskan alasan logismu. Program akan langsung memeriksa alasan dan memberikan umpan balik adaptif!
+        </p>
       </div>
-      <h1 className="text-2xl font-bold text-[#121c2c] mb-2">{materi.judul}</h1>
-      <p className="text-sm text-[#464555] mb-6">
-        Kelompokkan setiap kartu berikut ke kolom <strong>Input</strong>, <strong>Proses</strong>,
-        atau <strong>Output</strong> yang sesuai untuk program kasir Bu Ani.
-        Klik kartu untuk memilih, lalu klik kolom tujuan.
-      </p>
 
-      {/* Unplaced cards */}
-      <Card className="mb-6">
-        <h2 className="text-xs font-bold uppercase tracking-widest text-[#464555] mb-3">
-          Kartu yang belum ditempatkan
-        </h2>
-        <div className="flex flex-wrap gap-2 min-h-[48px]">
-          {unplaced.length === 0 && (
-            <span className="text-sm text-[#aaa] italic">Semua kartu sudah ditempatkan.</span>
+      {/* Kartu yang belum ditempatkan */}
+      <Card className="border border-[#bce0fd] p-4">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-[#253f8a]">
+            📦 Kartu Komponen Kasir yang Belum Ditempatkan ({unplaced.length} tersisa)
+          </h2>
+          <span className="text-[11px] text-slate-500">Klik kartu untuk memilih kolom &amp; isi alasan</span>
+        </div>
+
+        <div className="flex flex-wrap gap-2.5 min-h-[48px]">
+          {unplaced.length === 0 ? (
+            <span className="text-xs text-emerald-700 font-semibold italic bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
+              🎉 Semua kartu sudah ditempatkan dan dianalisis alasan logisnya!
+            </span>
+          ) : (
+            unplaced.map((item) => (
+              <UnplacedCard
+                key={item.id}
+                item={item}
+                onSelectCol={(col) => handleInitiatePlace(item, col)}
+              />
+            ))
           )}
-          {unplaced.map((item) => (
-            <UnplacedCard
-              key={item.id}
-              item={item}
-              onPlace={placeItem}
-            />
-          ))}
         </div>
       </Card>
 
-      {/* IPO columns */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        {COLUMNS.map((col) => (
-          <div key={col.key} className="flex flex-col gap-2">
-            <div
-              className="text-center font-bold text-sm py-2 rounded-2xl"
-              style={{ background: col.color }}
-            >
-              {col.icon} {col.label}
+      {/* MODAL / PROMPT ALASAN TIAP KALI MEMILIH 1 BLOK */}
+      {activePrompt && (
+        <div className="fixed inset-0 z-50 bg-black/45 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl border-2 border-[#68b6f7] shadow-2xl max-w-lg w-full p-5 flex flex-col gap-3.5 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-[#eaf6ff] pb-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">✍️</span>
+                <h3 className="font-bold text-sm text-[#121c2c]">
+                  Alasan Logis Penempatan Blok
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActivePrompt(null)}
+                className="size-7 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-bold flex items-center justify-center"
+              >
+                ✕
+              </button>
             </div>
-            <div
-              className="min-h-[160px] rounded-2xl border-2 border-dashed border-[#c0d8ef] p-2 flex flex-col gap-2"
-              style={{ background: col.color + '66' }}
-            >
-              {placedInColumn(col.key).map((item) => {
-                const fb = feedback[item.id];
-                return (
-                  <div
-                    key={item.id}
-                    className="relative flex items-center justify-between gap-1 px-3 py-2 rounded-xl text-sm font-semibold transition"
-                    style={{
-                      background: fb === 'correct' ? '#c3f7c0' : fb === 'wrong' ? '#ffd6d6' : 'white',
-                      border: `1.5px solid ${fb === 'correct' ? '#4caf50' : fb === 'wrong' ? '#e57373' : '#c0d8ef'}`,
-                      boxShadow: '0 2px 8px rgba(61,107,145,0.08)',
-                    }}
-                  >
-                    <span className="text-[#121c2c] text-xs leading-snug">{item.label}</span>
-                    <div className="flex items-center gap-1">
-                      {fb && <span>{fb === 'correct' ? '✅' : '❌'}</span>}
-                      <button
-                        onClick={() => removeItem(item.id)}
-                        aria-label={`Hapus ${item.label}`}
-                        className="text-[#aaa] hover:text-red-400 text-xs focus-visible:ring-1 focus-visible:ring-red-300 outline-none"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
+
+            <div className="p-3 rounded-2xl bg-[#f4fbff] border border-[#a6d7ff] flex flex-col gap-1">
+              <span className="text-[11px] text-[#253f8a] uppercase font-bold tracking-wide">
+                Kartu yang Dipilih:
+              </span>
+              <span className="font-bold text-sm text-[#121c2c]">{activePrompt.item.label}</span>
+              <span className="text-xs text-[#464555]">
+                Ditempatkan ke Kolom:{' '}
+                <strong className="text-[#253f8a] uppercase font-bold">
+                  {activePrompt.targetCol}
+                </strong>
+              </span>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="prompt-reason-input" className="text-xs font-bold text-[#121c2c]">
+                Mengapa kamu memilih kolom {activePrompt.targetCol.toUpperCase()} untuk blok ini? *
+              </label>
+              <textarea
+                id="prompt-reason-input"
+                rows={3}
+                value={promptReason}
+                onChange={(e) => setPromptReason(e.target.value)}
+                placeholder="Tuliskan alasan logismu mengapa memilih kategori tersebut..."
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#bce0fd] text-xs text-[#121c2c] bg-white focus:outline-none focus:ring-2 focus:ring-[#68b6f7] resize-none"
+              />
+              <span className="text-[10px] text-slate-500">
+                Wajib diisi minimal 4 karakter agar program dapat memeriksa ketepatan analisismu.
+              </span>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-1 border-t border-[#eaf6ff]">
+              <button
+                type="button"
+                onClick={() => setActivePrompt(null)}
+                className="px-4 py-2 rounded-full text-xs font-semibold text-[#464555] hover:bg-slate-100 transition"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveReasonAndPlace}
+                disabled={promptReason.trim().length < 4}
+                className="px-5 py-2 rounded-full text-xs font-bold text-white bg-[#253f8a] hover:brightness-110 disabled:opacity-40 transition shadow-sm"
+              >
+                ✓ Simpan &amp; Periksa Alasan
+              </button>
             </div>
           </div>
-        ))}
+        </div>
+      )}
+
+      {/* POPUP TINJAUAN FEEDBACK ADAPTIF SAAT INI */}
+      {viewingFeedbackItem && evaluations[viewingFeedbackItem.id] && (
+        <div
+          role="status"
+          className={`p-4 rounded-2xl border-2 flex flex-col gap-1.5 transition ${
+            evaluations[viewingFeedbackItem.id].status === 'bener'
+              ? 'bg-emerald-50 border-emerald-300 text-emerald-950'
+              : evaluations[viewingFeedbackItem.id].status === 'mendekati'
+              ? 'bg-amber-50 border-amber-300 text-amber-950'
+              : 'bg-red-50 border-red-300 text-red-950'
+          }`}
+        >
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-bold text-xs uppercase tracking-wide">
+              {evaluations[viewingFeedbackItem.id].badgeLabel} · {viewingFeedbackItem.label}
+            </span>
+            <button
+              type="button"
+              onClick={() => setViewingFeedbackItem(null)}
+              className="text-xs font-bold hover:underline opacity-70"
+            >
+              ✕ Tutup Umpan Balik
+            </button>
+          </div>
+          <p className="text-xs leading-relaxed font-medium">
+            {evaluations[viewingFeedbackItem.id].feedback}
+          </p>
+        </div>
+      )}
+
+      {/* 3 Kolom IPO */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {COLUMNS.map((col) => {
+          const itemsInCol = placedInColumn(col.key);
+          return (
+            <div key={col.key} className="flex flex-col gap-2">
+              <div
+                className="text-center font-bold text-xs sm:text-sm py-2 rounded-2xl border border-black/5"
+                style={{ background: col.color }}
+              >
+                {col.icon} {col.label} ({itemsInCol.length})
+              </div>
+
+              <div
+                className="min-h-[220px] rounded-2xl border-2 border-dashed border-[#c0d8ef] p-2.5 flex flex-col gap-2 transition"
+                style={{ background: col.color + '55' }}
+              >
+                {itemsInCol.length === 0 ? (
+                  <span className="text-[11px] text-slate-400 italic text-center my-auto">
+                    Belum ada kartu di kolom {col.label}
+                  </span>
+                ) : (
+                  itemsInCol.map((item) => {
+                    const ev = evaluations[item.id];
+                    const isCorrect = ev?.status === 'bener';
+                    const isMendekati = ev?.status === 'mendekati';
+                    return (
+                      <div
+                        key={item.id}
+                        className={`p-3 rounded-2xl border shadow-xs flex flex-col gap-1.5 transition ${
+                          isCorrect
+                            ? 'bg-emerald-50/90 border-emerald-300'
+                            : isMendekati
+                            ? 'bg-amber-50/90 border-amber-300'
+                            : 'bg-red-50/90 border-red-300'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-1">
+                          <span className="font-bold text-xs text-[#121c2c] leading-snug">
+                            {item.label}
+                          </span>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <span className="text-xs">
+                              {isCorrect ? '✅' : isMendekati ? '⚠️' : '❌'}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveItem(item.id)}
+                              className="text-slate-400 hover:text-red-500 text-xs px-1"
+                              title="Hapus dan tempatkan ulang"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+
+                        {ev && (
+                          <div className="text-[11px] text-[#464555] bg-white/80 p-2 rounded-xl border border-current/20 leading-relaxed">
+                            <span className="font-bold block text-[10px] text-[#253f8a]">
+                              Alasanmu: &ldquo;{ev.reason}&rdquo;
+                            </span>
+                            <span className="block mt-0.5 font-medium">{ev.feedback}</span>
+                          </div>
+                        )}
+
+                        <div className="flex justify-end gap-1 pt-0.5">
+                          <button
+                            type="button"
+                            onClick={() => handleInitiatePlace(item, col.key)}
+                            className="text-[10px] font-semibold text-[#253f8a] hover:underline"
+                          >
+                            ✎ Edit Alasan / Pindah
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Feedback message */}
-      {checked && !canProceed && (
-        <div role="alert" className="mb-4 p-4 rounded-2xl bg-red-50 border border-red-200 text-sm text-red-700">
-          Ada penempatan yang kurang tepat. Perhatikan kartu yang bertanda ❌ dan coba lagi!
-        </div>
-      )}
-      {canProceed && (
-        <div role="alert" className="mb-4 p-4 rounded-2xl bg-green-50 border border-green-200 text-sm text-green-700 font-semibold">
-          ✅ Analisis IPO kamu sudah benar! Tuliskan alasan di bawah sebelum lanjut ke tahap Dekomposisi.
-        </div>
-      )}
-
-      {/* Kolom Alasan / Argumen Siswa */}
-      {canProceed && (
-        <div className="mb-6 p-4 rounded-2xl bg-[#f8fbff] border border-[#bce0fd] flex flex-col gap-2">
-          <label className="text-xs font-bold text-[#1b2f68] flex items-center justify-between">
-            <span>✍️ Tuliskan Alasan / Argumen Kelompokmu (Wajib Sebelum Lanjut):</span>
-            <span className={`text-[10px] font-normal ${reason.trim().length >= 10 ? 'text-green-600 font-bold' : 'text-slate-400'}`}>
-              {reason.trim().length >= 10 ? '✓ Alasan terisi' : 'Minimal 10 karakter'}
-            </span>
-          </label>
-          <p className="text-[11px] text-[#464555]">
-            Mengapa kelompokmu mengelompokkan elemen-elemen di atas ke Input, Proses, dan Output tersebut, serta mengapa elemen pengecoh (misal nama toko / database) diabaikan?
-          </p>
-          <textarea
-            value={reason}
-            onChange={(e) => {
-              setReason(e.target.value);
-              setAnswer(`${materiId}-ipo-reason`, e.target.value);
-            }}
-            placeholder="Tuliskan alasan logis kelompokmu di sini..."
-            rows={3}
-            className="w-full p-3 rounded-xl border border-[#c0d8ef] text-xs text-[#121c2c] bg-white focus:outline-none focus:border-[#253f8a] resize-none"
-          />
+      {/* Alert jika kartu pengecoh masih ditaruh di kolom */}
+      {placedDistractors.length > 0 && (
+        <div className="p-3.5 rounded-2xl bg-amber-50 border-2 border-amber-300 text-xs text-amber-950 flex items-start gap-2.5 shadow-xs">
+          <span className="text-xl shrink-0">💡</span>
+          <div className="flex flex-col gap-1">
+            <strong className="font-bold text-amber-900">Perhatian Abstraksi Berpikir Komputasional:</strong>
+            <p className="leading-relaxed">
+              Kamu menempatkan kartu pengecoh (<strong>{placedDistractors.map((d) => d.label).join(', ')}</strong>) ke dalam kolom kasir.
+              Sesuai prinsip <em>Abstraksi</em>, informasi yang tidak dibutuhkan dalam perhitungan kasir harus disaring dan dikeluarkan.
+              Silakan klik tanda silang (✕) pada kartu tersebut untuk mengeluarkannya dari kolom.
+            </p>
+          </div>
         </div>
       )}
 
-      {/* Actions */}
-      <div className="flex items-center justify-between">
-        {demoMode && (
-          <button
-            onClick={handleDemoSkip}
-            className="px-4 py-2 rounded-full text-sm font-semibold text-yellow-800 bg-yellow-200 hover:bg-yellow-300 transition"
-          >
-            🎬 Demo: Lewati IPO
-          </button>
-        )}
-        <div className="ml-auto flex gap-3">
+      {/* Ringkasan & Tombol Aksi */}
+      <Card className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 border border-[#bce0fd]">
+        <div className="text-xs text-[#464555] flex flex-col gap-0.5">
+          <span>
+            Kartu inti teranalisis:{' '}
+            <strong>
+              {requiredItems.filter((i) => placed[i.id] === i.category && evaluations[i.id]?.status !== 'salah').length}
+            </strong>{' '}
+            / {requiredItems.length} kartu
+          </span>
           {!canProceed && (
+            <span className="text-amber-800 font-semibold text-[11px]">
+              {placedDistractors.length > 0
+                ? '⚠️ Keluarkan kartu pengecoh dari kolom untuk menuntaskan tahap Abstraksi.'
+                : '⚠️ Pastikan seluruh kartu inti ditempatkan di kolom yang tepat dan alasan logisnya sudah terisi.'}
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          {demoMode && (
             <button
-              onClick={handleCheck}
-              disabled={Object.keys(placed).length < 5}
-              className="px-6 py-3 rounded-full font-bold text-sm text-[#253f8a] transition-all disabled:opacity-40 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-[#68b6f7] outline-none active:scale-95"
-              style={{
-                background: '#eaf6ff',
-                border: '1.5px solid #a6d7ff',
-                boxShadow:
-                  'inset 2px 2px 4px rgba(61,107,145,0.18), inset -2px -2px 4px rgba(255,255,255,0.85), 0 4px 10px rgba(61,107,145,0.12)',
-              }}
+              type="button"
+              onClick={handleDemoSkip}
+              className="px-3.5 py-2 rounded-full text-xs font-semibold text-amber-900 bg-amber-200 hover:bg-amber-300 transition"
             >
-              🔍 Periksa Jawaban
+              🎬 Demo: Lewati IPO
             </button>
           )}
+
           <button
-            onClick={() => {
-              setAnswer(`${materiId}-ipo-reason`, reason.trim());
-              navigate(`/materi/${materiId}/dekomposisi`);
-            }}
-            disabled={!canProceed || reason.trim().length < 10}
-            className="inline-flex items-center gap-2 font-bold rounded-full px-6 py-3 text-sm text-white transition-all hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-blue-400 outline-none active:scale-95"
+            type="button"
+            onClick={handleProceedToDekomposisi}
+            disabled={!canProceed}
+            className="px-6 py-2.5 rounded-full font-bold text-xs sm:text-sm text-white transition hover:brightness-110 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed shadow-md"
             style={{
-              background: canProceed && reason.trim().length >= 10 ? 'linear-gradient(to bottom, #68b6f7, #3d6b91)' : '#c0cfe0',
-              boxShadow: canProceed && reason.trim().length >= 10
-                ? '0 14px 20px -4px rgba(61,107,145,0.45), inset 0 2px 3px rgba(255,255,255,0.7), inset 0 -3px 0 #253f8a'
-                : 'none',
+              background: canProceed ? 'linear-gradient(to bottom, #68b6f7, #253f8a)' : '#94a3b8',
             }}
           >
             Lanjut ke Dekomposisi →
           </button>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
 
-// ─── Unplaced card component with column picker ───────────────────
+// Komponen kartu belum ditempatkan dengan menu pilih kolom
 function UnplacedCard({
   item,
-  onPlace,
+  onSelectCol,
 }: {
   item: IpoItem;
-  onPlace: (id: string, col: 'input' | 'process' | 'output') => void;
+  onSelectCol: (col: 'input' | 'process' | 'output') => void;
 }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="relative">
       <button
+        type="button"
         onClick={() => setOpen((v) => !v)}
-        className="px-3 py-2 rounded-xl text-xs font-semibold text-[#253f8a] transition hover:bg-[#d0ecff] focus-visible:ring-2 focus-visible:ring-[#68b6f7] outline-none"
-        style={{
-          background: '#eaf6ff',
-          border: '1.5px solid #a6d7ff',
-          boxShadow: '0 2px 8px rgba(61,107,145,0.08)',
-        }}
+        className="px-3 py-2 rounded-xl text-xs font-bold text-[#253f8a] bg-[#eaf6ff] border border-[#a6d7ff] hover:bg-[#d0ecff] transition flex items-center gap-1.5 shadow-2xs"
       >
-        {item.label}
+        <span>{item.label}</span>
+        <span className="text-[10px] opacity-70">▼</span>
       </button>
+
       {open && (
-        <div className="absolute top-full left-0 mt-1 z-10 bg-white rounded-xl shadow-lg border border-[#eaf6ff] flex flex-col overflow-hidden min-w-[120px]">
+        <div className="absolute top-full left-0 mt-1 z-20 bg-white rounded-2xl shadow-xl border-2 border-[#a6d7ff] flex flex-col overflow-hidden min-w-[150px] animate-in fade-in duration-100">
+          <span className="px-3 py-1 bg-slate-100 text-[10px] font-bold text-slate-600">
+            Pilih Kolom:
+          </span>
           {(['input', 'process', 'output'] as const).map((col) => (
             <button
               key={col}
-              onClick={() => { onPlace(item.id, col); setOpen(false); }}
-              className="px-4 py-2 text-xs font-semibold text-left hover:bg-[#eaf6ff] transition capitalize"
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                onSelectCol(col);
+              }}
+              className="px-3.5 py-2 text-xs font-semibold text-left hover:bg-[#eaf6ff] hover:text-[#253f8a] transition capitalize"
             >
-              → {col === 'input' ? 'Input' : col === 'process' ? 'Proses' : 'Output'}
+              → {col === 'input' ? '📥 Input' : col === 'process' ? '⚙️ Proses' : '📤 Output'}
             </button>
           ))}
         </div>

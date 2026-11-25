@@ -6,7 +6,7 @@ export type PblStage =
   | 'lab';
 
 export type PausePointType = 'kinesthetic' | 'prediction';
-
+ 
 export interface PredictionOption {
   id: string;
   label: string;
@@ -42,8 +42,9 @@ export interface Materi {
 export const MATERI_LIST: Materi[] = [
   {
     id: 1,
-    judul: 'Variabel & Tipe Data',
-    deskripsi: 'Memahami konsep wadah variabel, penugasan nilai, dan tipe data (String & Integer) dalam Python.',
+    judul: 'Variabel, Penugasan Nilai & Tipe Data',
+    deskripsi:
+      'Menyimpan data ke dalam variabel, melakukan penugasan nilai, dan memahami tipe data dasar Python (String, Integer, Float, Boolean).',
     stages: ['video', 'ipo', 'dekomposisi', 'parsons', 'lab'],
     locked: false,
     videoSrc: '/video/materi fiks.mp4',
@@ -60,26 +61,26 @@ export const MATERI_LIST: Materi[] = [
         id: 'm1-prediction',
         time: 186.5,
         type: 'prediction',
-        optional: true,
+        optional: false,
         title: 'Prediksi Konsep: Nilai Kotak Total Harga',
         prediction: {
           context:
-            'Pembeli menambah 1 porsi sehingga variabel jumlah_porsi diganti nilainya, tetapi perhitungan total_harga belum dijalankan ulang.',
-          question: 'Menurutmu, isi kotak variabel total_harga saat ini yang mana?',
+            'Pembeli menambah 1 porsi sehingga kotak wadah jumlah diganti isinya, tetapi perhitungan total_harga belum dijalankan ulang.',
+          question: 'Menurutmu, isi kotak total_harga saat ini yang mana?',
           options: [
             {
               id: '16000',
               label: '16000',
               isCorrect: true,
               feedback:
-                'Tepat! Nilai di dalam kotak total_harga saat ini tetap 16000 karena mengubah variabel jumlah_porsi tidak mengubah variabel hasil hitungan yang sudah tersimpan sebelum dihitung dan ditugaskan ulang.',
+                'Tepat! Nilai di dalam kotak total_harga saat ini tetap 16000 karena mengubah isi kotak jumlah tidak otomatis mengubah isi kotak total_harga yang sudah tersimpan sebelum dihitung dan dimasukkan ulang.',
             },
             {
               id: '24000',
               label: '24000',
               isCorrect: false,
               feedback:
-                'Belum tepat di memori komputer! Meskipun pesanan bertambah, isi kotak total_harga tetap 16000 sampai komputer menjalankan ulang perhitungan dan menyimpannya kembali ke kotak total_harga.',
+                'Belum tepat di memori komputer! Meskipun pesanan bertambah, isi kotak total_harga tetap 16000 sampai komputer menjalankan ulang perhitungan dan memasukkannya kembali ke kotak total_harga.',
             },
           ],
         },
@@ -88,8 +89,8 @@ export const MATERI_LIST: Materi[] = [
   },
   {
     id: 2,
-    judul: 'Operator & Ekspresi Aritmatika',
-    deskripsi: 'Operasi matematika dan ekspresi logika dalam kalkulasi program.',
+    judul: 'Operator dalam Python',
+    deskripsi: 'Mengenal operator aritmatika (+, -, *, /, //, %, **), perbandingan, dan logika dalam Python.',
     stages: ['video', 'ipo', 'dekomposisi', 'parsons', 'lab'],
     locked: true,
   },

@@ -1,6 +1,8 @@
+import { syncLogToServer } from './researchApi';
+
 // Event Logging System for StepVerse
 // Stores {timestamp, studentId, materi, stage, componentId, ctComponent, result, attemptNo, payload}
-// Persists in localStorage (with Repository pattern for easy backend replacement)
+// Persists in localStorage and syncs to server DB for research analysis
 
 export type CtComponent =
   | 'decomposition'
@@ -16,6 +18,8 @@ export interface LogEventRecord {
   id: string;
   timestamp: string; // ISO 8601
   studentId: string;
+  studentName?: string;
+  groupId?: string;
   materi: number;
   stage: string;
   componentId: string;
@@ -68,7 +72,7 @@ export class LocalStorageLogRepository implements ILogRepository {
 // Default singleton repository
 export const defaultLogRepository: ILogRepository = new LocalStorageLogRepository();
 
-let attemptCounters: Record<string, number> = {};
+const attemptCounters: Record<string, number> = {};
 
 /** Helper to log an event with active user session */
 export function logEvent(params: {
@@ -81,24 +85,33 @@ export function logEvent(params: {
   attemptNo?: number;
 }): void {
   try {
-    // Read user from store / storage
     let studentId = 'tamu';
-    const storeRaw = localStorage.getItem('stepverse-store');
-    if (storeRaw) {
-      const parsed = JSON.parse(storeRaw);
-      if (parsed?.state?.user?.id) {
-        studentId = parsed.state.user.id;
+    let studentName: string | undefined;
+    let groupId: string | undefined;
+
+    if (typeof localStorage !== 'undefined') {
+      const storeRaw = localStorage.getItem('stepverse-store');
+      if (storeRaw) {
+        const parsed = JSON.parse(storeRaw);
+        if (parsed?.state?.user?.id) {
+          studentId = parsed.state.user.id;
+          studentName = parsed.state.user.nama;
+          groupId = parsed.state.user.kelompok;
+        }
       }
     }
 
     const materi = params.materi ?? 1;
     const counterKey = `${studentId}-${materi}-${params.stage}-${params.componentId}`;
-    const calculatedAttempt = params.attemptNo ?? ((attemptCounters[counterKey] = (attemptCounters[counterKey] || 0) + 1));
+    const calculatedAttempt =
+      params.attemptNo ?? (attemptCounters[counterKey] = (attemptCounters[counterKey] || 0) + 1);
 
     const record: LogEventRecord = {
       id: `evt-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       timestamp: new Date().toISOString(),
       studentId,
+      studentName,
+      groupId,
       materi,
       stage: params.stage,
       componentId: params.componentId,
@@ -109,6 +122,7 @@ export function logEvent(params: {
     };
 
     void defaultLogRepository.save(record);
+    void syncLogToServer(record as unknown as Record<string, unknown>);
   } catch (err) {
     console.warn('[Logger] Error creating log event', err);
   }

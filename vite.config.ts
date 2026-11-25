@@ -12,12 +12,12 @@ export default defineConfig({
   },
   server: {
     host: '0.0.0.0',
-    port: 8443,
-    strictPort: true,
+    port: 3000,
+    allowedHosts: true,
   },
   preview: {
     host: '0.0.0.0',
-    port: 8443,
+    port: 3000,
   },
   build: {
     sourcemap: false,

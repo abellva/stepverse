@@ -36,7 +36,7 @@ describe('Video Pause Points', () => {
     });
   });
 
-  it('defines Materi 1 pause points in curriculum with kinesthetic (S1-15 + 2s) and optional prediction (S2-05 + 2s)', () => {
+  it('defines Materi 1 pause points in curriculum with kinesthetic (S1-15 + 2s) and mandatory prediction (S2-05 + 2s)', () => {
     const materi1 = MATERI_LIST.find((m) => m.id === 1);
     expect(materi1).toBeDefined();
     expect(materi1?.videoSrc).toBe('/video/materi fiks.mp4');
@@ -49,7 +49,7 @@ describe('Video Pause Points', () => {
 
     expect(prediction.type).toBe('prediction');
     expect(prediction.time).toBe(186.5);
-    expect(prediction.optional).toBe(true);
+    expect(prediction.optional).toBe(false);
     expect(prediction.prediction?.options).toHaveLength(2);
   });
 

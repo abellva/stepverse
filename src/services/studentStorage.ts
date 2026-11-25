@@ -20,6 +20,7 @@ export interface StudentRecord {
   nama: string;
   kelas: string;
   sekolah: string;
+  kelompok?: string;
   progress: Record<string, StageProgress>;
   answers: Record<string, unknown>;
   attempts: Record<string, number>;
@@ -60,7 +61,7 @@ export function calculateFeatureScores(
   const parsonsRaw = answers['1-parsons-score'] ?? (progress['1-parsons'] === 'done' ? 100 : undefined);
   const parsons = typeof parsonsRaw === 'number' ? parsonsRaw : undefined;
 
-  // Lab: dynamic score (after hint deductions)
+  // Lab: 100 if passed without hint penalties
   const labRaw = answers['1-lab-score'] ?? answers['lab_score'] ?? (progress['1-lab'] === 'done' ? 100 : undefined);
   const lab = typeof labRaw === 'number' ? labRaw : undefined;
 
@@ -136,7 +137,7 @@ export function syncActiveUserProgress(
     decomposition: scores.dekomposisi ?? (progress['1-dekomposisi'] === 'done' ? 95 : 70),
     abstraction: scores.ipo ?? (progress['1-ipo'] === 'done' ? 90 : 70),
     algorithm_design: scores.parsons ?? (progress['1-parsons'] === 'done' ? 95 : 65),
-    debugging: scores.lab ?? (progress['1-lab'] === 'done' ? 85 : 60),
+    debugging: scores.lab ?? (progress['1-lab'] === 'done' ? 90 : 60),
     iteration: Math.min(100, 70 + (attempts['1-lab'] || 1) * 6),
     generalization: scores.posttest ?? (progress['1-lab'] === 'done' ? 85 : 60),
   };
@@ -147,6 +148,7 @@ export function syncActiveUserProgress(
     nama: user.nama,
     kelas: user.kelas || existing?.kelas || 'X MIPA 1',
     sekolah: existing?.sekolah || 'SMAN 1 Nusantara',
+    kelompok: user.kelompok || existing?.kelompok || 'Kelompok 1',
     progress: { ...existing?.progress, ...progress },
     answers: { ...existing?.answers, ...answers },
     attempts: { ...existing?.attempts, ...attempts },
