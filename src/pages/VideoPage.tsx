@@ -188,10 +188,10 @@ export default function VideoPage() {
     const triggered = findTriggeredPausePoint(v.currentTime, pausePoints, freshCompletions);
 
     if (triggered) {
-      if (v.currentTime > triggered.time + 0.35) {
+      v.pause();
+      if (v.currentTime > triggered.time + 0.15) {
         v.currentTime = triggered.time;
       }
-      v.pause();
       triggerPausePoint(triggered);
       const boundedRatio = Math.min(v.currentTime, triggered.time) / v.duration;
       if (boundedRatio > maxWatchedRef.current) {
@@ -226,10 +226,10 @@ export default function VideoPage() {
     const freshCompletions = getFreshCompletionsSnapshot();
     const triggered = findTriggeredPausePoint(v.currentTime, pausePoints, freshCompletions);
     if (triggered) {
+      v.pause();
       if (v.currentTime > triggered.time + 0.05) {
         v.currentTime = triggered.time;
       }
-      v.pause();
       triggerPausePoint(triggered);
     }
   }
@@ -254,10 +254,10 @@ export default function VideoPage() {
     }
     const triggered = findTriggeredPausePoint(v.currentTime, pausePoints, freshCompletions);
     if (triggered) {
+      v.pause();
       if (v.currentTime > triggered.time + 0.05) {
         v.currentTime = triggered.time;
       }
-      v.pause();
       triggerPausePoint(triggered);
     }
   }
@@ -309,6 +309,10 @@ export default function VideoPage() {
     setAnswer(getPausePointStorageKey(materiId), {});
     setAnswer(`${materiId}-simulasi`, { role1Done: false, role2Done: false });
     registerReplayEvent('manual_reset_replay', 0);
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
+      videoRef.current.pause();
+    }
   }
 
   function runFallbackSimulation(
@@ -466,6 +470,25 @@ export default function VideoPage() {
             </div>
           )}
         </div>
+
+        {/* Banner informasi jika jeda aktivitas sudah selesai sebelumnya */}
+        {Object.keys(completions).length > 0 && !activePausePoint && (
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-[#f0f9ff] border border-[#bae6fd] text-[#0369a1] text-xs">
+            <div className="flex items-center gap-2">
+              <span className="text-base shrink-0">ℹ️</span>
+              <span className="leading-relaxed">
+                <strong>Aktivitas jeda sudah selesai:</strong> Video tidak akan berhenti otomatis lagi saat ditonton ulang karena simulasi kinestetik &amp; prediksi konsep sudah tercatat selesai di akunmu.
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleResetPausePoints}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-xs bg-[#0284c7] text-white hover:bg-[#0369a1] shadow-xs transition active:scale-95 cursor-pointer shrink-0"
+            >
+              🔄 Reset &amp; Ulangi Jeda Otomatis
+            </button>
+          </div>
+        )}
 
         {/* Banner kecil "Video dijeda" saat aktivitas jeda terbuka */}
         {activePausePoint && (
